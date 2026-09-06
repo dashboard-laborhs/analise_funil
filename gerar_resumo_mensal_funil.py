@@ -7,14 +7,13 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment
 
 from gerar_oportunidades_reais_codes import (
+    build_clustered_funil,
     clean_columns,
-    jaccard_codes,
     normalize_doc_to_14,
     normalize_valor_to_numeric,
     pick_doc_col,
@@ -301,10 +300,6 @@ def prepare_base_dataframe(df_raw: pd.DataFrame) -> pd.DataFrame:
     df["Faturou"] = pd.to_numeric(df["Faturou"], errors="coerce").fillna(0).astype(int)
     df["Enviado_Aprovacao"] = pd.to_numeric(df["Enviado_Aprovacao"], errors="coerce").fillna(0).astype(int)
     df["CNPJ"] = normalize_doc_to_14(df["CNPJ"])
-    df["Data_Referencia_Faturamento"] = df["Data_Faturamento"].where(
-        df["Data_Faturamento"].notna(),
-        df["Data"],
-    )
 
     df = df.dropna(subset=["Data"]).copy()
     df["ID_Orcamento"] = pd.to_numeric(df["ID_Orcamento"], errors="coerce").astype("Int64")
@@ -411,82 +406,6 @@ def apply_date_filters(df: pd.DataFrame, start_str: str, end_str: str) -> pd.Dat
     return filtered
 
 
-def apply_broad_date_filters(df: pd.DataFrame, start_str: str, end_str: str) -> pd.DataFrame:
-    filtered = df.copy()
-    reference_col = "Data_Referencia_Faturamento"
-
-    if start_str:
-        start_dt = pd.to_datetime(start_str, errors="coerce")
-        if pd.isna(start_dt):
-            raise ValueError(f"Data inicial invalida: {start_str}. Use o formato YYYY-MM-DD.")
-        filtered = filtered[
-            (filtered["Data"] >= start_dt)
-            | (filtered[reference_col] >= start_dt)
-        ].copy()
-
-    if end_str:
-        end_dt = pd.to_datetime(end_str, errors="coerce")
-        if pd.isna(end_dt):
-            raise ValueError(f"Data final invalida: {end_str}. Use o formato YYYY-MM-DD.")
-        filtered = filtered[
-            (filtered["Data"] <= end_dt)
-            | (filtered[reference_col] <= end_dt)
-        ].copy()
-
-    return filtered
-
-
-def build_clustered_opportunities(
-    base_df: pd.DataFrame,
-    items_map: dict[int, set[str]],
-    delta_horas: float,
-    sim_min: float,
-) -> pd.DataFrame:
-    base = base_df[base_df["Enviado_Aprovacao"] == 1].copy()
-
-    if base.empty:
-        return base
-
-    base = base.sort_values(["Vendedor", "CNPJ", "Data", "ID_Orcamento"]).reset_index(drop=True)
-    base["DeltaHoras"] = base.groupby(["Vendedor", "CNPJ"])["Data"].diff().dt.total_seconds() / 3600
-    base["Prev_ID"] = base.groupby(["Vendedor", "CNPJ"])["ID_Orcamento"].shift(1)
-
-    similarities: list[float] = []
-    for current_id, previous_id in zip(base["ID_Orcamento"].tolist(), base["Prev_ID"].tolist()):
-        if pd.isna(previous_id):
-            similarities.append(np.nan)
-            continue
-
-        similarities.append(
-            jaccard_codes(
-                items_map.get(int(current_id), set()),
-                items_map.get(int(previous_id), set()),
-            )
-        )
-
-    base["Itens_Similarity"] = similarities
-    base["Crit_Tempo_OK"] = base["DeltaHoras"].notna() & (base["DeltaHoras"] <= delta_horas)
-    base["Crit_Itens_OK"] = base["Itens_Similarity"].fillna(0.0) >= sim_min
-    base["Relacionado"] = base["Crit_Tempo_OK"] & base["Crit_Itens_OK"]
-    base["Novo_Cluster"] = (~base["Relacionado"]).astype(int)
-    base.loc[base.groupby(["Vendedor", "CNPJ"]).cumcount() == 0, "Novo_Cluster"] = 1
-    base["Cluster_ID"] = base.groupby(["Vendedor", "CNPJ"])["Novo_Cluster"].cumsum()
-
-    base["Oportunidade_Real"] = 0
-    for (_, _, _), group_df in base.groupby(["Vendedor", "CNPJ", "Cluster_ID"], sort=False):
-        faturados_indexes = group_df.index[group_df["Faturou"] == 1].tolist()
-
-        if faturados_indexes:
-            base.loc[faturados_indexes, "Oportunidade_Real"] = 1
-        else:
-            last_index = group_df.index[-1]
-            base.loc[last_index, "Oportunidade_Real"] = 1
-
-    oportunidades = base[base["Oportunidade_Real"] == 1].copy()
-    oportunidades["Valor_Faturado"] = np.where(oportunidades["Faturou"] == 1, oportunidades["Valor"], 0.0)
-    return oportunidades
-
-
 def summarize_period(
     oportunidades_df: pd.DataFrame,
     period_start: date,
@@ -536,36 +455,6 @@ def summarize_period(
     }
 
 
-def summarize_period_by_creation(
-    base_df: pd.DataFrame,
-    items_map: dict[int, set[str]],
-    period_start: date,
-    period_end: date,
-    delta_horas: float,
-    sim_min: float,
-) -> dict[str, float]:
-    start_ts = pd.Timestamp(period_start)
-    end_ts = pd.Timestamp(period_end)
-    base_periodo = base_df[
-        (base_df["Data"] >= start_ts)
-        & (base_df["Data"] <= end_ts)
-    ].copy()
-
-    oportunidades_periodo = build_clustered_opportunities(
-        base_df=base_periodo,
-        items_map=items_map,
-        delta_horas=delta_horas,
-        sim_min=sim_min,
-    )
-
-    return summarize_period(
-        oportunidades_df=oportunidades_periodo,
-        period_start=period_start,
-        period_end=period_end,
-        date_col="Data",
-    )
-
-
 def format_output(output_path: Path):
     workbook = load_workbook(output_path)
     target_sheets = [OUTPUT_SHEET_NAME_CRIACAO, OUTPUT_SHEET_NAME_DATA_FAT]
@@ -603,20 +492,25 @@ def main():
     dax2_raw = load_dax2_dataframe(args.itens)
 
     base_df_full = prepare_base_dataframe(dax1_raw)
+    items_map = build_items_map(dax2_raw)
+
+    # A remocao de ruido roda uma unica vez sobre o historico completo (nao
+    # isolada por mes), para que uma recotacao seja reconhecida mesmo quando a
+    # negociacao original ou o faturamento cai fora do mes analisado. As duas
+    # visoes (Data de Criacao / Data de Faturamento) diferem apenas em qual
+    # coluna de data seleciona quem pertence a cada mes.
+    _, oportunidades_full, _ = build_clustered_funil(
+        base_df_full,
+        items_map,
+        args.delta_horas,
+        args.sim_min,
+    )
+    if oportunidades_full.empty:
+        raise ValueError("Nenhuma oportunidade real foi identificada na base informada.")
+
     base_df_criacao = apply_date_filters(base_df_full, args.start, args.end)
-    base_df_broad = apply_broad_date_filters(base_df_full, args.start, args.end)
     if base_df_criacao.empty:
         raise ValueError("A base DAX1 ficou vazia depois do filtro informado.")
-
-    items_map = build_items_map(dax2_raw)
-    oportunidades_df = build_clustered_opportunities(
-        base_df=base_df_broad,
-        items_map=items_map,
-        delta_horas=args.delta_horas,
-        sim_min=args.sim_min,
-    )
-    if oportunidades_df.empty:
-        raise ValueError("Nenhuma oportunidade real foi identificada na base informada.")
 
     if args.start:
         min_date = pd.to_datetime(args.start, errors="coerce").date()
@@ -627,7 +521,7 @@ def main():
     else:
         max_date = max(
             base_df_criacao["Data"].max().date(),
-            oportunidades_df["Data_Referencia_Faturamento"].dropna().max().date(),
+            oportunidades_full["Data_Referencia_WR_Faturamento"].dropna().max().date(),
         )
     if args.modo == "comercial":
         analysis_months = build_commercial_months(min_date, max_date)
@@ -642,19 +536,17 @@ def main():
     partial_months: list[CommercialMonth] = []
 
     for analysis_month in analysis_months:
-        metrics_criacao = summarize_period_by_creation(
-            base_df=base_df_criacao,
-            items_map=items_map,
+        metrics_criacao = summarize_period(
+            oportunidades_df=oportunidades_full,
             period_start=analysis_month.analyzed_start,
             period_end=analysis_month.analyzed_end,
-            delta_horas=args.delta_horas,
-            sim_min=args.sim_min,
+            date_col="Data",
         )
         metrics_data_fat = summarize_period(
-            oportunidades_df=oportunidades_df,
+            oportunidades_df=oportunidades_full,
             period_start=analysis_month.analyzed_start,
             period_end=analysis_month.analyzed_end,
-            date_col="Data_Referencia_Faturamento",
+            date_col="Data_Referencia_WR_Faturamento",
         )
 
         base_row = {
