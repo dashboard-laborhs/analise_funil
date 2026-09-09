@@ -431,18 +431,50 @@
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:12px;">
 <div class="hover-scale" style="background:#E1F0EA;border:1px solid #D3E8E0;border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:16px;">
 <span class="material-symbols-outlined" style="font-size:32px;color:#2E6B5C;" aria-hidden="true">mood</span>
-<div style="flex:1;"><div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#5E9284;">Concentração — Faturados</div><div><span id="ti-fat-concentracao" style="font-size:24px;font-weight:700;color:#2E6B5C;">-</span><span style="font-size:16px;color:#2E6B5C;font-weight:700;"> do valor vem dos 5 principais itens</span></div><div id="ti-fat-concentracao-contexto" style="font-size:12px;color:#7C88A6;margin-top:2px;">-</div></div>
+<div style="flex:1;"><div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#5E9284;">Concentração — Faturados<span class="info-tip">
+  <span class="material-symbols-outlined info-tip-icon" style="font-size:16px;color:#5E9284;vertical-align:-3px;margin-left:4px;" aria-label="Informação sobre Concentração — Faturados">info</span>
+  <span class="info-tip-box" style="left:0;text-transform:none;letter-spacing:normal;">
+    <ul>
+      <li>Considera os itens dentro de orçamentos <b>Faturados</b> no período.</li>
+      <li>O valor de cada item é a soma de quantidade × preço nas linhas em que ele aparece.</li>
+      <li>O percentual mostra quanto do valor total faturado vem só dos <b>5 itens de maior valor</b>.</li>
+    </ul>
+  </span>
+</span></div><div><span id="ti-fat-concentracao" style="font-size:24px;font-weight:700;color:#2E6B5C;">-</span><span style="font-size:16px;color:#2E6B5C;font-weight:700;"> do valor vem dos 5 principais itens</span></div><div id="ti-fat-concentracao-contexto" style="font-size:12px;color:#7C88A6;margin-top:2px;">-</div></div>
 <div style="background:#F6FBF9;border-radius:12px;padding:8px 16px;min-width:200px;max-width:240px;">
-<div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#9AA4BE;margin-bottom:3px;">Líder</div>
+<div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#9AA4BE;margin-bottom:3px;">Líder<span class="info-tip">
+  <span class="material-symbols-outlined info-tip-icon" style="font-size:14px;color:#9AA4BE;vertical-align:-2px;margin-left:3px;" aria-label="Informação sobre Líder">info</span>
+  <span class="info-tip-box" style="left:0;text-transform:none;letter-spacing:normal;">
+    <ul>
+      <li>É o item nº 1 do ranking de <b>Concentração — Faturados</b> ao lado.</li>
+    </ul>
+  </span>
+</span></div>
 <div style="font-size:12px;line-height:1.35;"><span id="ti-fat-lider-codigo" style="color:#9AA4BE;">-</span> <span id="ti-fat-lider-nome" style="font-weight:700;color:#1F2937;">-</span></div>
 <div id="ti-fat-lider-valor" style="font-size:17px;font-weight:700;color:#2E6B5C;margin-top:2px;">-</div>
 </div>
 </div>
 <div class="hover-scale" style="background:#F2E1E3;border:1px solid #EAD6D9;border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:16px;">
 <span class="material-symbols-outlined" style="font-size:32px;color:#B34954;" aria-hidden="true">mood_bad</span>
-<div style="flex:1;"><div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#B0838A;">Concentração — Enviados, Não Aprovados</div><div><span id="ti-env-concentracao" style="font-size:24px;font-weight:700;color:#B34954;">-</span><span style="font-size:16px;color:#B34954;font-weight:700;"> do valor vem dos 5 principais itens</span></div><div id="ti-env-concentracao-contexto" style="font-size:12px;color:#7C88A6;margin-top:2px;">-</div></div>
+<div style="flex:1;"><div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#B0838A;">Concentração — Enviados, Não Aprovados<span class="info-tip">
+  <span class="material-symbols-outlined info-tip-icon" style="font-size:16px;color:#B0838A;vertical-align:-3px;margin-left:4px;" aria-label="Informação sobre Concentração — Enviados, Não Aprovados">info</span>
+  <span class="info-tip-box" style="right:0;text-transform:none;letter-spacing:normal;">
+    <ul>
+      <li>Considera os itens dentro de orçamentos <b>Enviados ao Cliente</b>, mas ainda sem faturamento nem aprovação do cliente.</li>
+      <li>O valor de cada item é a soma de quantidade × preço nas linhas em que ele aparece.</li>
+      <li>O percentual mostra quanto do valor total desse grupo vem só dos <b>5 itens de maior valor</b>.</li>
+    </ul>
+  </span>
+</span></div><div><span id="ti-env-concentracao" style="font-size:24px;font-weight:700;color:#B34954;">-</span><span style="font-size:16px;color:#B34954;font-weight:700;"> do valor vem dos 5 principais itens</span></div><div id="ti-env-concentracao-contexto" style="font-size:12px;color:#7C88A6;margin-top:2px;">-</div></div>
 <div style="background:#FCF6F7;border-radius:12px;padding:8px 16px;min-width:200px;max-width:240px;">
-<div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#C6A6AA;margin-bottom:3px;">Líder</div>
+<div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#C6A6AA;margin-bottom:3px;">Líder<span class="info-tip">
+  <span class="material-symbols-outlined info-tip-icon" style="font-size:14px;color:#C6A6AA;vertical-align:-2px;margin-left:3px;" aria-label="Informação sobre Líder">info</span>
+  <span class="info-tip-box" style="right:0;text-transform:none;letter-spacing:normal;">
+    <ul>
+      <li>É o item nº 1 do ranking de <b>Concentração — Enviados, Não Aprovados</b> ao lado.</li>
+    </ul>
+  </span>
+</span></div>
 <div style="font-size:12px;line-height:1.35;"><span id="ti-env-lider-codigo" style="color:#C6A6AA;">-</span> <span id="ti-env-lider-nome" style="font-weight:700;color:#1F2937;">-</span></div>
 <div id="ti-env-lider-valor" style="font-size:17px;font-weight:700;color:#B34954;margin-top:2px;">-</div>
 </div>
