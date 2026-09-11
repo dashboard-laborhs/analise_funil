@@ -43,6 +43,7 @@ MONTH_LABELS_PT = {
 OUTPUT_COLUMNS = [
     "Mês/Ano Comercial",
     "Periodo",
+    "Periodo Completo",
     "Enviados_Qtd (Sem Ruído)",
     "Enviados_Valor (Sem Ruído)",
     "Faturado_Qtd (Sem Ruído)",
@@ -131,6 +132,11 @@ def parse_args():
         "--end",
         default="",
         help="Data final opcional para limitar a base analisada, no formato YYYY-MM-DD.",
+    )
+    parser.add_argument(
+        "--excluir-orcamentos",
+        default="",
+        help="Numeros de orcamento a expurgar da analise (ex.: erro de digitacao), separados por virgula.",
     )
     return parser.parse_args()
 
@@ -459,8 +465,8 @@ def format_output(output_path: Path):
     workbook = load_workbook(output_path)
     target_sheets = [OUTPUT_SHEET_NAME_CRIACAO, OUTPUT_SHEET_NAME_DATA_FAT]
 
-    currency_columns = {"D", "F", "H"}
-    percent_columns = {"I", "J"}
+    currency_columns = {"E", "G", "I"}
+    percent_columns = {"J", "K"}
 
     for sheet_name in target_sheets:
         if sheet_name not in workbook.sheetnames:
@@ -493,6 +499,14 @@ def main():
 
     base_df_full = prepare_base_dataframe(dax1_raw)
     items_map = build_items_map(dax2_raw)
+
+    if args.excluir_orcamentos:
+        excluir_ids = {
+            int(v) for v in args.excluir_orcamentos.split(",") if v.strip()
+        }
+        antes = len(base_df_full)
+        base_df_full = base_df_full[~base_df_full["ID_Orcamento"].isin(excluir_ids)].copy()
+        print(f"Orcamentos expurgados: {sorted(excluir_ids)} ({antes - len(base_df_full)} linha(s) removida(s))")
 
     # A remocao de ruido roda uma unica vez sobre o historico completo (nao
     # isolada por mes), para que uma recotacao seja reconhecida mesmo quando a
@@ -552,6 +566,7 @@ def main():
         base_row = {
             "Mês/Ano Comercial": analysis_month.month_label,
             "Periodo": analysis_month.period_label,
+            "Periodo Completo": analysis_month.complete_period,
         }
         rows_criacao.append(
             {

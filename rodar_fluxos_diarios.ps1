@@ -80,6 +80,66 @@ print('1' if end == ref else '0')
   Set-Content -Path (Join-Path $snapshotDir "meta.json") -Value $meta -Encoding UTF8
 
   Write-Host "Snapshot mensal arquivado em: $snapshotDir"
+
+  Atualizar-HistoricoMensalConsolidado -Since $Since -SnapshotLabel $snapshotLabel
+}
+
+function Atualizar-HistoricoMensalConsolidado {
+  param(
+    [datetime]$Since,
+    [string]$SnapshotLabel
+  )
+
+  # A linha do mes que acabou de fechar cabe folgada na janela rolante da
+  # extracao diaria (~2-3 meses), entao reaproveitamos os arquivos DAX que o
+  # Fluxo 1 acabou de tratar em vez de exigir uma extracao mais ampla. O
+  # historico consolidado so cresce: cada rodada faz upsert por mes, nunca
+  # duplica.
+  $configObj = Get-Content ".\automacao_config.json" -Raw | ConvertFrom-Json
+  $pythonExe = $configObj.python_executable
+  if (-not $pythonExe) { $pythonExe = "py -3.12" }
+  $pythonParts = $pythonExe -split '\s+'
+  $pythonCmd = $pythonParts[0]
+  $pythonCmdArgs = @()
+  if ($pythonParts.Length -gt 1) { $pythonCmdArgs = $pythonParts[1..($pythonParts.Length - 1)] }
+
+  $arquivoRuido = Get-ChildItem ".\entrada" -Filter "dax_orcamentos_tratado_power_automate_*.xlsx" -File |
+    Where-Object { $_.LastWriteTime -ge $Since } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+  $arquivoItens = Get-ChildItem ".\entrada" -Filter "dax_itens_tratado_power_automate_*.xlsx" -File |
+    Where-Object { $_.LastWriteTime -ge $Since } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+  if (-not $arquivoRuido -or -not $arquivoItens) {
+    Write-Host "AVISO: nao encontrei os arquivos DAX tratados desta rodada. Historico consolidado nao foi atualizado."
+    return
+  }
+
+  & $pythonCmd @pythonCmdArgs ".\gerar_resumo_mensal_funil.py" -i $arquivoRuido.FullName -it $arquivoItens.FullName -o "resumo_mensal_fechamento"
+  if ($LASTEXITCODE -ne 0) { throw "gerar_resumo_mensal_funil.py falhou ao processar o fechamento de $SnapshotLabel." }
+
+  $resumoMensalGerado = Get-ChildItem ".\historico" -Filter "resumo_mensal_fechamento_*.xlsx" -File |
+    Sort-Object LastWriteTime -Descending | Select-Object -First 1
+  if (-not $resumoMensalGerado) {
+    throw "gerar_resumo_mensal_funil.py nao produziu o arquivo esperado para o fechamento de $SnapshotLabel."
+  }
+
+  & $pythonCmd @pythonCmdArgs ".\atualizar_historico_mensal_consolidado.py" -i $resumoMensalGerado.FullName
+  if ($LASTEXITCODE -ne 0) { throw "atualizar_historico_mensal_consolidado.py falhou." }
+
+  & $pythonCmd @pythonCmdArgs ".\gerar_historico_mensal_json.py" -i ".\historico\historico_mensal_consolidado.xlsx" --meses 12
+  if ($LASTEXITCODE -ne 0) { throw "gerar_historico_mensal_json.py falhou." }
+
+  & $pythonCmd @pythonCmdArgs ".\atualizar_dashboard_historico_js.py"
+  if ($LASTEXITCODE -ne 0) { throw "atualizar_dashboard_historico_js.py falhou." }
+
+  $historicoDashboardJs = ".\Dashboard Analise Funil\data\historico_dashboard.js"
+  $dashboardPublishDir = $configObj.paths.dashboard_analise_funil_publish_dir
+  if ($dashboardPublishDir -and (Test-Path $dashboardPublishDir) -and (Test-Path $historicoDashboardJs)) {
+    Copy-Item $historicoDashboardJs (Join-Path $dashboardPublishDir "historico_dashboard.js") -Force
+    Write-Host "Historico mensal consolidado publicado para:" (Join-Path $dashboardPublishDir "historico_dashboard.js")
+  }
+  else {
+    Write-Host "Historico mensal consolidado atualizado localmente (nao publicado - verifique dashboard_analise_funil_publish_dir)."
+  }
 }
 
 $logDir = Join-Path $PSScriptRoot "logs"

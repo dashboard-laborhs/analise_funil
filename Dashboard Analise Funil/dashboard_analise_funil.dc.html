@@ -7,12 +7,13 @@
 <script src="./data/comparativo_dashboard.js"></script>
 <script src="./data/resumo_insight_dashboard.js"></script>
 <script src="./data/top_itens_dashboard.js"></script>
+<script src="./data/historico_dashboard.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=quick_reference_all,article,inventory_2,paid,pie_chart,mood,mood_bad,how_to_reg,calendar_month,update,info,person,flag,sell,storefront,download" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=quick_reference_all,article,inventory_2,paid,pie_chart,mood,mood_bad,how_to_reg,calendar_month,update,info,person,flag,sell,storefront,download,history" />
 <style>
   .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20;vertical-align:middle;}
   *{margin:0;padding:0;box-sizing:border-box;}
@@ -86,6 +87,7 @@
           <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#9AA4BE;"><span class="material-symbols-outlined" style="font-size:15px;" aria-hidden="true">calendar_month</span><span id="page-periodo">Período analisado: -</span></span>
           <span style="color:#D7DDEC;">|</span>
           <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#9AA4BE;"><span class="material-symbols-outlined" style="font-size:15px;" aria-hidden="true">update</span><span id="page-updated">Atualizado em: -</span></span>
+          <button onClick="{{ abrirModalHistorico }}" style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#2B50F0;background:#F1F5FF;border:none;border-radius:999px;padding:6px 14px;cursor:pointer;" aria-label="Ver histórico mensal"><span class="material-symbols-outlined" style="font-size:15px;" aria-hidden="true">history</span>Histórico</button>
         </div>
         <div style="display:flex;gap:4px;background:#fff;border:1px solid #D7DDEC;border-radius:999px;padding:4px;box-shadow:0 2px 10px rgba(20,30,70,0.06);">
           <button onClick="{{ goConversao }}" style="{{ tabConvStyle }}">Comparativo</button>
@@ -588,11 +590,49 @@
 </div>
 </div>
 </sc-if>
+
+<sc-if value="{{ modalHistoricoAberto }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ fecharModalHistorico }}" style="position:fixed;inset:0;background:rgba(14,26,58,0.45);display:flex;align-items:center;justify-content:center;z-index:65;animation:modalOverlayIn .18s ease;">
+<div style="transform:scale({{ scale }});transform-origin:center center;">
+<div onClick="{{ pararPropagacao }}" style="background:#fff;border-radius:20px;width:1280px;max-height:900px;padding:32px;box-shadow:0 24px 60px rgba(24,38,90,0.25);display:flex;flex-direction:column;gap:8px;animation:modalDialogIn .22s cubic-bezier(0.16,1,0.3,1);overflow-y:auto;">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
+<div style="display:flex;flex-direction:column;gap:3px;">
+<span style="font-size:20px;font-weight:700;color:#0E1A3A;">Histórico Mensal do Funil</span>
+<span id="modal-historico-periodo" style="font-size:13px;color:#7C88A6;">-</span>
+</div>
+<button onClick="{{ fecharModalHistorico }}" style="border:none;background:#F1F5FF;border-radius:10px;width:32px;height:32px;font-size:16px;cursor:pointer;color:#5B6478;flex:none;" aria-label="Fechar">×</button>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+<div style="display:flex;align-items:center;gap:16px;">
+<span style="display:inline-block;font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2B50F0;background:#F1F5FF;border-radius:8px;padding:6px 12px;">Funil em Volume de Orçamentos</span>
+<span style="display:flex;align-items:center;gap:14px;margin-left:auto;">
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#6E93FF;"></span>Enviados para Aprovação</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#3D5FE8;"></span>Faturados</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#2E6B5C;"></span>Win Rate Volume</span>
+</span>
+</div>
+<div id="modal-historico-chart-volume"></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:24px;">
+<div style="display:flex;align-items:center;gap:16px;">
+<span style="display:inline-block;font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2B50F0;background:#F1F5FF;border-radius:8px;padding:6px 12px;">Funil em Valor de Orçamentos</span>
+<span style="display:flex;align-items:center;gap:14px;margin-left:auto;">
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#8FB0FF;"></span>Enviados para Aprovação</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#4A6FE0;"></span>Faturados</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#2E6B5C;"></span>Win Rate Valor</span>
+</span>
+</div>
+<div id="modal-historico-chart-valor"></div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;showUplift&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
 class Component extends DCLogic {
-  state = { scale: 1, screen: 'conversao', modalAberto: false, modalItem: null, modalOrcamentoAberto: false, modalOrcamento: null, modalStatusAberto: false, modalStatus: null };
+  state = { scale: 1, screen: 'conversao', modalAberto: false, modalItem: null, modalOrcamentoAberto: false, modalOrcamento: null, modalStatusAberto: false, modalStatus: null, modalHistoricoAberto: false };
 
   constructor(props){
     super(props);
@@ -608,6 +648,7 @@ class Component extends DCLogic {
     this.applyResumoAtualData();
     this.applyComparativoData();
     this.applyTopItensData();
+    this.applyHistoricoData();
     setTimeout(() => this.animate(), 250);
   }
 
@@ -880,6 +921,103 @@ class Component extends DCLogic {
     preencherCard('ti-env-qtd', data.perdas?.top5_quantidade, (item) => item.orcamentos || 0, (item) => String(item.orcamentos ?? '-'));
     preencherCard('ti-env-vol', data.perdas?.top5_volume, (item) => item.volume || 0, (item) => item.volume_fmt || '-');
     preencherCard('ti-env-val', data.perdas?.top5_valor, (item) => item.valor_numero || 0, (item) => item.valor_numero ? this.fmtBrlFullCents(item.valor_numero) : '-');
+  }
+
+  montarGraficoHistorico(meses, enviados, enviadosFmt, faturados, faturadosFmt, winRatePct, corSerieClara, corSerieEscura){
+    const width = 1160, height = 300;
+    const padLeft = 46, padRight = 46, padTop = 40, padBottom = 30;
+    const chartW = width - padLeft - padRight;
+    const n = meses.length;
+
+    // Duas faixas verticais independentes: a linha de win rate vive só na
+    // faixa de cima, a área de volume/valor só na faixa de baixo, com um
+    // respiro entre elas - assim nunca se cruzam, por construção.
+    const faixaWinRateAltura = 62;
+    const respiro = 16;
+    const faixaAreaTopo = padTop + faixaWinRateAltura + respiro;
+    const faixaAreaAltura = (height - padBottom) - faixaAreaTopo;
+
+    const maxVal = Math.max(1, ...enviados, ...faturados) * 1.15;
+    const wrMin = Math.min(...winRatePct);
+    const wrMax = Math.max(...winRatePct);
+    const wrFolga = Math.max(2, (wrMax - wrMin) * 0.3);
+    const wrDomMin = Math.max(0, wrMin - wrFolga);
+    const wrDomMax = Math.min(100, wrMax + wrFolga);
+    const wrSpan = (wrDomMax - wrDomMin) || 1;
+
+    const xStep = n > 1 ? chartW / (n - 1) : 0;
+    const xAt = (i) => padLeft + xStep * i;
+    const yAt = (v) => faixaAreaTopo + faixaAreaAltura - (v / maxVal) * faixaAreaAltura;
+    const yAtPct = (p) => padTop + faixaWinRateAltura - ((Math.max(wrDomMin, Math.min(wrDomMax, p)) - wrDomMin) / wrSpan) * faixaWinRateAltura;
+    const pathLine = (arr, yFn) => arr.map((v, i) => `${i === 0 ? 'M' : 'L'} ${xAt(i).toFixed(1)} ${yFn(v).toFixed(1)}`).join(' ');
+    const faixaAreaBase = faixaAreaTopo + faixaAreaAltura;
+    const pathArea = (arr, yFn) => `${pathLine(arr, yFn)} L ${xAt(n - 1).toFixed(1)} ${faixaAreaBase.toFixed(1)} L ${xAt(0).toFixed(1)} ${faixaAreaBase.toFixed(1)} Z`;
+
+    const gridLines = [0.25, 0.5, 0.75].map((f) => {
+      const y = faixaAreaTopo + faixaAreaAltura * (1 - f);
+      return `<line x1="${padLeft}" y1="${y.toFixed(1)}" x2="${padLeft + chartW}" y2="${y.toFixed(1)}" stroke="#E7EBF5" stroke-width="1" stroke-dasharray="3 4"/>`;
+    }).join('');
+
+    const areaEnviados = `<path d="${pathArea(enviados, yAt)}" fill="${corSerieClara}" opacity="0.45"/>`;
+    const areaFaturados = `<path d="${pathArea(faturados, yAt)}" fill="${corSerieEscura}" opacity="0.75"/>`;
+    const linhaEnviados = `<path d="${pathLine(enviados, yAt)}" fill="none" stroke="${corSerieClara}" stroke-width="2"/>`;
+    const linhaFaturados = `<path d="${pathLine(faturados, yAt)}" fill="none" stroke="${corSerieEscura}" stroke-width="2"/>`;
+    const linhaWinRate = `<path d="${pathLine(winRatePct, yAtPct)}" fill="none" stroke="#2E6B5C" stroke-width="2.5"/>`;
+
+    const rotulosEnviados = enviados.map((v, i) => {
+      const y = yAt(v) + 17;
+      return `<text x="${xAt(i).toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#0E1A3A">${this.escapeHtml(enviadosFmt[i])}</text>`;
+    }).join('');
+    const rotulosFaturados = faturados.map((v, i) => {
+      const y = yAt(v) + 17;
+      return `<text x="${xAt(i).toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#0E1A3A">${this.escapeHtml(faturadosFmt[i])}</text>`;
+    }).join('');
+
+    const pontosWinRate = winRatePct.map((p, i) => {
+      const x = xAt(i), y = yAtPct(p);
+      const centerY = y - 16;
+      const label = p.toFixed(1).replace('.', ',') + '%';
+      const boxW = 16 + label.length * 6.6;
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="#2E6B5C"/><rect x="${(x - boxW / 2).toFixed(1)}" y="${(centerY - 10).toFixed(1)}" width="${boxW.toFixed(1)}" height="19" rx="9.5" fill="#E1F0EA"/><text x="${x.toFixed(1)}" y="${(centerY + 4).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#2E6B5C">${label}</text>`;
+    }).join('');
+
+    const eixoX = meses.map((m, i) => `<text x="${xAt(i).toFixed(1)}" y="${(height - 6).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="600" fill="#9AA4BE">${this.escapeHtml(m)}</text>`).join('');
+
+    return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;height:${height}px;display:block;">${gridLines}${areaEnviados}${areaFaturados}${linhaEnviados}${linhaFaturados}${rotulosEnviados}${rotulosFaturados}${linhaWinRate}${pontosWinRate}${eixoX}</svg>`;
+  }
+
+  applyHistoricoData(){
+    const data = window.WIN_RATE_HISTORICO_DATA;
+    if(!data || !data.meses || !data.meses.length) return;
+
+    this.setText('modal-historico-periodo', `${data.meses[0]} a ${data.meses[data.meses.length - 1]} · Atualizado em ${data.atualizado_em || '-'}`);
+
+    const volumeEl = document.getElementById('modal-historico-chart-volume');
+    if(volumeEl && data.volume){
+      volumeEl.innerHTML = this.montarGraficoHistorico(
+        data.meses, data.volume.enviados, data.volume.enviados_fmt,
+        data.volume.faturados, data.volume.faturados_fmt, data.volume.win_rate_pct,
+        '#6E93FF', '#3D5FE8'
+      );
+    }
+
+    const valorEl = document.getElementById('modal-historico-chart-valor');
+    if(valorEl && data.valor){
+      valorEl.innerHTML = this.montarGraficoHistorico(
+        data.meses, data.valor.enviados, data.valor.enviados_fmt,
+        data.valor.faturados, data.valor.faturados_fmt, data.valor.win_rate_pct,
+        '#8FB0FF', '#4A6FE0'
+      );
+    }
+  }
+
+  abrirModalHistorico(){
+    this.setState({ modalHistoricoAberto: true });
+    setTimeout(() => this.applyHistoricoData(), 30);
+  }
+
+  fecharModalHistorico(){
+    this.setState({ modalHistoricoAberto: false });
   }
 
   escapeHtml(s){
@@ -1231,6 +1369,9 @@ class Component extends DCLogic {
       fecharModalOrcamento: () => this.fecharModalOrcamento(),
       modalStatusAberto: this.state.modalStatusAberto,
       fecharModalStatus: () => this.fecharModalStatus(),
+      modalHistoricoAberto: this.state.modalHistoricoAberto,
+      abrirModalHistorico: () => this.abrirModalHistorico(),
+      fecharModalHistorico: () => this.fecharModalHistorico(),
       pararPropagacao: (e) => e.stopPropagation(),
       goConversao: () => {
         this.setState({ screen: 'conversao' });
