@@ -412,7 +412,7 @@ Objetivo: gerar uma planilha mensal historica com os mesmos conceitos de remocao
 ### O que o fluxo faz
 
 1. le os arquivos DAX1 e DAX2 diretamente em `json` ou em base tratada
-2. aplica a mesma logica de remocao de ruido do `gerar_oportunidades_reais_codes.py`
+2. aplica a mesma logica de remocao de ruido do `gerar_oportunidades_reais_codes.py` (importada de la, nao duplicada — roda uma unica vez sobre o historico completo da base recebida, nunca isolada por mes)
 3. consolida os indicadores `Sem Ruído` por linha mensal
 4. permite gerar a visao por mes comercial ou por mes calendario
 5. grava a saida em um Excel historico auxiliar
@@ -425,7 +425,8 @@ Objetivo: gerar uma planilha mensal historica com os mesmos conceitos de remocao
 ### Saida principal
 
 - `historico\resumo_mensal_funil_YYYYMMDD_HHMMSS.xlsx`, aba `Resumo_Mensal_Funil`, com as colunas:
-  `Mês/Ano Comercial`, `Periodo`, `Enviados_Qtd (Sem Ruído)`, `Enviados_Valor (Sem Ruído)`, `Faturado_Qtd (Sem Ruído)`, `Faturado_Valor (Sem Ruído)`, `Nao_Convertidas_Qtd (Sem Ruído)`, `Nao_Convertidas_Valor (Sem Ruído)`, `Win Rate (Volume) % (Sem Ruído)`, `Win Rate (Valor) % (Sem Ruído)`.
+  `Mês/Ano Comercial`, `Periodo`, `Periodo Completo`, `Enviados_Qtd (Sem Ruído)`, `Enviados_Valor (Sem Ruído)`, `Faturado_Qtd (Sem Ruído)`, `Faturado_Valor (Sem Ruído)`, `Nao_Convertidas_Qtd (Sem Ruído)`, `Nao_Convertidas_Valor (Sem Ruído)`, `Win Rate (Volume) % (Sem Ruído)`, `Win Rate (Valor) % (Sem Ruído)`.
+- `Periodo Completo` (booleano): indica se a janela analisada bate exatamente com o mes comercial teorico. Fica `False` quando a base recebida trunca uma das pontas do mes (ex.: extracao comecando no meio do mes, ou mes ainda em andamento) — esses meses nao devem ser tratados como definitivos nem entrar no historico consolidado (ver abaixo).
 
 ### Modos disponiveis
 
@@ -436,7 +437,8 @@ Objetivo: gerar uma planilha mensal historica com os mesmos conceitos de remocao
 
 - `--start` e `--end` limitam a janela total da base analisada
 - `--modo` define se a agregacao de cada linha sera comercial ou calendario
-- quando a base nao cobre o ciclo inteiro, o script mantem a linha e informa no console os meses parciais
+- `--excluir-orcamentos 612268,615529` remove numeros de orcamento especificos da analise antes da remocao de ruido — usado para expurgar erro de digitacao/duplicidade sem editar a base bruta
+- quando a base nao cobre o ciclo inteiro, o script mantem a linha, marca `Periodo Completo = False` e informa no console os meses parciais
 - para o primeiro mes comercial sair completo, a extracao deve comecar antes do inicio do mes alvo
   - ex.: para analisar `Jun/25 a Nov/25` em modo comercial, a extracao deve comecar em `01/05/2025`
   - ex.: para analisar `Dez/25 a Abr/26` em modo comercial, a extracao deve comecar em `01/11/2025`
@@ -461,6 +463,19 @@ $dax1 = Get-ChildItem -LiteralPath $jsonDir -Filter "dax_query_base_orcamentos_f
 $dax2 = Get-ChildItem -LiteralPath $jsonDir -Filter "dax_query_base_itens_funil_*.json" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 py -3.12 .\gerar_resumo_mensal_funil.py -i $dax1.FullName -it $dax2.FullName --modo calendario --start 2025-12-01 --end 2026-04-30 -o resumo_calendario_dez_abr
 ```
+
+### Historico consolidado e grafico "Historico" no dashboard
+
+Alem da planilha avulsa acima, existe um pipeline separado que mantem um historico mensal que so cresce (nunca reprocessa o passado inteiro), alimentando o botao **"Historico"** no cabecalho do dashboard — um modal com 2 graficos de area (Volume e Valor de orcamentos, Enviados x Faturados, com a linha de Win Rate numa faixa propria pra nunca sobrepor as areas) dos ultimos 12 meses fechados.
+
+Passos (rodados automaticamente todo dia que o mes comercial fecha — ver secao 9):
+
+1. `gerar_resumo_mensal_funil.py` gera a planilha do(s) mes(es) mais recente(s), a partir dos mesmos arquivos DAX tratados que o Fluxo 1 ja gerou naquele dia (a janela rolante de ~2-3 meses da extracao diaria sempre inclui o mes que acabou de fechar).
+2. `atualizar_historico_mensal_consolidado.py -i <planilha>` faz **upsert por mes** (chave = `Mês/Ano Comercial`) em `historico\historico_mensal_consolidado.xlsx` — so aceita linhas com `Periodo Completo = True`, substitui qualquer mes ja existente com o mesmo rotulo, e reordena cronologicamente. Rodar de novo para o mesmo mes e seguro (idempotente).
+3. `gerar_historico_mensal_json.py -i historico\historico_mensal_consolidado.xlsx --meses 12` gera o JSON com os ultimos N meses completos (`Enviados`/`Faturados`/`Win Rate`, por volume e por valor).
+4. `atualizar_dashboard_historico_js.py` grava `Dashboard Analise Funil\data\historico_dashboard.js`, que e publicado no SharePoint junto com os outros 3 arquivos do dashboard.
+
+Como o mecanismo so alimenta o consolidado a partir do mes em que foi criado, popular meses anteriores exige rodar os 4 passos manualmente contra uma extracao mais ampla do Power Automate (feito uma unica vez, em 2026-09, para cobrir Set/25-Ago/26 — usando duas extracoes DAX com filtro de data mais largo, ja que uma unica extracao nao cobre 12 meses de uma vez).
 
 ## 5. Estrutura de Pastas
 
@@ -553,6 +568,13 @@ O fluxo do Power Automate que extrai as consultas DAX roda de **segunda a sexta,
 ### `rodar_fluxos_diarios.ps1`
 
 Script wrapper que roda o `Insight Funil` e, se terminar sem erro, na sequencia o `Comparativo` — ambos com `-SkipItensPerdas` (a etapa de itens/rankings nao e usada pelo JSON final nem pelo dashboard, entao pular ela deixa a rodada bem mais rapida). Se o Fluxo 1 falhar, o Fluxo 2 nao roda.
+
+Depois que os dois fluxos terminam com sucesso, roda mais dois passos, ambos so-leitura/gravacao local (nenhum dos dois refaz a extracao):
+
+- **Snapshot mensal** (`Arquivar-SnapshotMensalSeFechou`): verifica se o mes comercial fechou ontem (mesma regra de penultimo dia util usada no resto do projeto). Se fechou, arquiva uma copia dos 3 JSONs publicados naquele dia — Resumo Atual, Top Itens, Comparativo — em `historico\snapshots_mensais\<AAAA-MM>\` (pensado para, no futuro, permitir "retroceder" as 3 abas do dashboard para um mes fechado).
+- **Historico consolidado** (`Atualizar-HistoricoMensalConsolidado`): reaproveitando os mesmos arquivos DAX que o Fluxo 1 acabou de tratar, roda a cadeia descrita na secao 4 (`gerar_resumo_mensal_funil.py` → `atualizar_historico_mensal_consolidado.py` → `gerar_historico_mensal_json.py` → `atualizar_dashboard_historico_js.py`) e publica o resultado no SharePoint.
+
+Na maioria dos dias o mes nao fechou, entao esses dois passos so imprimem um aviso e nao fazem nada. Se algum dos dois falhar, fica so um aviso no log — nao afeta os dados ja publicados pelos Fluxos 1 e 2.
 
 Cria a pasta `logs\` automaticamente e grava um log timestampado de cada execucao (`logs\agendamento_fluxos_YYYYMMDD_HHMMSS.log`, via `Start-Transcript`), com tudo que apareceria na tela numa rodada manual — inclusive erros.
 
