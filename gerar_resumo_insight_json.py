@@ -111,7 +111,9 @@ def load_itens_por_orcamento(itens_path: Path | None) -> dict:
             preco_promocao = float(row.get("PrecoPromocao", 0) or 0)
             preco_praticado = valor_item / quantidade_item if quantidade_item > 0 else 0.0
             desconto_pct = (
-                (preco_tabela - preco_praticado) / preco_tabela * 100 if preco_tabela > 0 else 0.0
+                round((preco_tabela - preco_praticado) / preco_tabela * 100, 2)
+                if preco_tabela > 0
+                else 0.0
             )
             linhas.append(
                 {
