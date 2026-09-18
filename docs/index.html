@@ -1567,7 +1567,7 @@ class Component extends DCLogic {
     }
   });
   var __accessCheckAttempts = 0;
-  var __maxAccessCheckAttempts = 16; // 16 x 500ms = 8s
+  var __maxAccessCheckAttempts = 40; // 40 x 500ms = 20s
   function __pollDashboardAccess() {
     if (window.__COMPARATIVO_DATA_FAILED || window.__RESUMO_DATA_FAILED || window.__TOPITENS_DATA_FAILED) {
       __showNoAccessModal();
