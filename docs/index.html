@@ -1527,19 +1527,13 @@ class Component extends DCLogic {
 
 <div id="df-noaccess-modal" class="df-noaccess-modal" aria-hidden="true">
   <div class="df-noaccess-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="df-noaccess-title">
-    <div class="df-noaccess-emoji">🔒</div>
-    <div id="df-noaccess-title" class="df-noaccess-title">Entre com sua conta corporativa</div>
-    <div class="df-noaccess-body">O Resumo Atual, o Comparativo e o Top Itens contêm informações comerciais de uso interno. Para visualizar esses dados, você precisa estar conectado à sua conta corporativa Microsoft e ter permissão de acesso.
-      <br><br>
-      <strong>Já tem permissão?</strong>
-      <ol style="text-align:left;margin:10px auto 0;padding-left:20px;max-width:380px;">
-        <li>Clique em <strong>Acessar SharePoint</strong> e faça login, se solicitado.</li>
-        <li>Volte para esta página e clique em <strong>Recarregar página</strong>.</li>
-      </ol>
-    </div>
+    <div class="df-noaccess-emoji">😞</div>
+    <div id="df-noaccess-title" class="df-noaccess-title">Que pena! Você não tem acesso a esses dados</div>
+    <div class="df-noaccess-body">Este painel contém informações comerciais de uso interno. Para visualizar o Resumo Atual, o Comparativo e o Top Itens, é necessário estar autenticado com sua conta corporativa Microsoft.<br><br>Já tem acesso liberado mas está vendo esta mensagem? Clique em "Acessar SharePoint", faça login se for solicitado, e depois recarregue esta página.</div>
     <div class="df-noaccess-actions">
       <a id="df-noaccess-sharepoint" class="df-noaccess-btn primary" href="https://bunzlbr.sharepoint.com/sites/InsightsVendas" target="_blank" rel="noopener">Acessar SharePoint</a>
       <button id="df-noaccess-reload" class="df-noaccess-btn secondary" type="button">Recarregar página</button>
+      <button id="df-noaccess-dismiss" class="df-noaccess-btn secondary" type="button">Entendi</button>
     </div>
   </div>
 </div>
@@ -1564,6 +1558,12 @@ class Component extends DCLogic {
   document.addEventListener('click', function (e) {
     if (e.target.closest('#df-noaccess-reload')) {
       window.location.reload();
+    } else if (e.target.closest('#df-noaccess-dismiss')) {
+      var __m = document.getElementById('df-noaccess-modal');
+      if (__m) {
+        __m.classList.remove('is-open');
+        __m.setAttribute('aria-hidden', 'true');
+      }
     }
   });
   var __accessCheckAttempts = 0;
