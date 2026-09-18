@@ -1511,6 +1511,8 @@ class Component extends DCLogic {
     padding:10px 16px;
     cursor:pointer;
     border:1px solid #E7EBF5;
+    display:inline-block;
+    text-decoration:none;
   }
   .df-noaccess-btn.primary{
     background:#2B50F0;
@@ -1527,9 +1529,10 @@ class Component extends DCLogic {
   <div class="df-noaccess-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="df-noaccess-title">
     <div class="df-noaccess-emoji">😞</div>
     <div id="df-noaccess-title" class="df-noaccess-title">Que pena! Você não tem acesso a esses dados</div>
-    <div class="df-noaccess-body">Este painel contém informações comerciais de uso interno. Para visualizar o Resumo Atual, o Comparativo e o Top Itens, é necessário estar autenticado com sua conta corporativa Microsoft.</div>
+    <div class="df-noaccess-body">Este painel contém informações comerciais de uso interno. Para visualizar o Resumo Atual, o Comparativo e o Top Itens, é necessário estar autenticado com sua conta corporativa Microsoft.<br><br>Já tem acesso liberado mas está vendo esta mensagem? Clique em "Acessar SharePoint", faça login se for solicitado, e depois recarregue esta página.</div>
     <div class="df-noaccess-actions">
-      <button id="df-noaccess-reload" class="df-noaccess-btn primary" type="button">Recarregar página</button>
+      <a id="df-noaccess-sharepoint" class="df-noaccess-btn primary" href="https://bunzlbr.sharepoint.com/sites/InsightsVendas" target="_blank" rel="noopener">Acessar SharePoint</a>
+      <button id="df-noaccess-reload" class="df-noaccess-btn secondary" type="button">Recarregar página</button>
       <button id="df-noaccess-dismiss" class="df-noaccess-btn secondary" type="button">Entendi</button>
     </div>
   </div>
