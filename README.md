@@ -13,17 +13,19 @@ Regra de ordem da publicacao:
 1. primeiro publicar o `Insight Funil`
 2. depois publicar o `Comparativo`
 
-No desenho atual da automacao local:
+### Onde roda cada parte
 
-- `rodar_fluxo_funil.ps1` e o fluxo principal da rodada
-- `rodar_fluxo_comparativo_funil.ps1` gera o comparativo
+**Producao (desde 21/09/2026): GitHub Actions**, no repositorio privado `dashboard-laborhs/analise-funil-automacao`. Todo dia util, por volta das 08:00, o Power Automate extrai os 2 DAX do Power BI, commita `dax1.json`/`dax2.json` nesse repositorio e dispara os 3 workflows (Diario, Comparativo e Historico). Cada workflow roda os mesmos scripts Python deste projeto e devolve o resultado a um flow do Power Automate, que grava no SharePoint. O passo a passo da configuracao esta no README daquele repositorio.
 
-Modo de operacao atual:
+**Este repositorio** guarda:
 
-- o Power Automate executa as consultas DAX no Power BI e grava os JSONs na pasta de extracao sincronizada
-- a execucao local dos scripts acontece manualmente, por comando, em `Teste` ou `Producao`
+- o dashboard (`Dashboard Analise Funil\`) e a versao publica em `docs\` (GitHub Pages, ver secao 10)
+- os scripts Python, iguais aos do repositorio de automacao (mudanca na logica de producao precisa ir para os dois)
+- o **modo local** (`rodar_fluxo_funil.ps1`, `rodar_fluxo_comparativo_funil.ps1`, `rodar_fluxos_diarios.ps1`), que roda o mesmo processamento na maquina, por comando — util para testes, reprocessamentos e como contingencia se o GitHub Actions ficar indisponivel
 
-## Diagrama do Fluxo
+O diagrama abaixo e as secoes 1, 2, 7 e 9 descrevem o modo local.
+
+## Diagrama do Fluxo (modo local)
 
 ```mermaid
 flowchart TD
@@ -330,17 +332,19 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 ## 3. Fluxos Power Automate
 
-Recomendacao de organizacao:
+Na producao (GitHub Actions):
 
-- `Fluxo 1 - Extracao DAX Power BI`
-  Funcao: executar DAX 1 e DAX 2 e salvar arquivos brutos em `/Entrada/FunilExtracao`.
-  Observacao: a extracao deve cobrir a janela necessaria para atender o `Insight Funil` e o `Comparativo` na mesma rodada.
+- `Flow A - Extracao DAX`
+  Funcao: executar DAX 1 e DAX 2, commitar `dax1.json`/`dax2.json` no repositorio `analise-funil-automacao` e disparar os 3 workflows.
+  Observacao: a extracao deve cobrir a janela necessaria para o `Insight Funil`, o `Comparativo` e o mes que acabou de fechar.
 
-- `Fluxo 2 - Publicacao Insight Diario`
-  Funcao: monitorar a pasta final do `Insight Funil` e postar o Adaptive Card no Teams.
+- `Flow B`, `Flow B2` e `Flow B3` (gatilho HTTP)
+  Funcao: receber o resultado do Fluxo Diario, do Comparativo e do Historico e gravar no SharePoint (`Producao/StaticWebApp`, `Producao/FunilInsights`, `Producao/FunilComparativos`).
 
-- `Fluxo 3 - Publicacao Comparativo`
-  Funcao: monitorar a pasta final de comparativo e postar o Adaptive Card comparativo no Teams.
+- `Publicacao Insight Diario` e `Publicacao Comparativo`
+  Funcao: monitorar `FunilInsights` e `FunilComparativos` e postar os Adaptive Cards no Teams (o do Insight tambem envia e-mail).
+
+No modo local, o Flow A grava os JSONs brutos em `/Entrada/FunilExtracao` e os `.ps1` copiam os resultados direto para as pastas sincronizadas do SharePoint.
 
 ## 4. Resumo Mensal Historico (auxiliar)
 
@@ -429,12 +433,12 @@ Sugestao de organizacao:
 
 - `rodar_fluxo_funil.ps1` — quando quiser executar a rodada principal do funil e gerar o `Insight Funil`
 - `rodar_fluxo_comparativo_funil.ps1` — quando quiser gerar o comparativo depois da rodada principal
-- `rodar_fluxos_diarios.ps1` — roda os dois em sequencia (usado pela automacao agendada, ver secao 9)
+- `rodar_fluxos_diarios.ps1` — roda os dois em sequencia (era usado pela automacao agendada local, ver secao 9)
 - `gerar_resumo_mensal_funil.py` — quando quiser gerar uma visao historica mensal auxiliar da base, em mes comercial ou calendario
 
 Observacao operacional:
 
-- o uso diario normal e automatico via Agendador de Tarefas do Windows (ver secao 9); tambem da pra rodar manualmente a qualquer momento, primeiro `Insight Funil`, depois `Comparativo`
+- o uso diario normal e automatico, no GitHub Actions (ver Visao Geral); os comandos locais servem para testes e contingencia, sempre primeiro `Insight Funil`, depois `Comparativo`
 - a extracao base ja deve ter sido gerada pelo Power Automate antes dos comandos locais
 - no modo padrao: `Insight Funil` considera mes comercial atual ate ontem; `Comparativo` considera mes comercial atual ate ontem versus periodo equivalente do mes comercial anterior por dias uteis; `Resumo Mensal Funil` usa o modo `comercial`, salvo quando `--modo calendario` for informado
 
@@ -493,9 +497,9 @@ O PowerShell do `Comparativo`:
 3. copia o comparativo para a pasta sincronizada correta
 4. deixa o Power Automate assumir a postagem no Teams
 
-## 9. Automacao Agendada (Task Scheduler)
+## 9. Automacao Agendada local (Task Scheduler) — desativada
 
-A rodada diaria roda sozinha, via **Agendador de Tarefas do Windows**, sem precisar de comando manual.
+Ate 18/09/2026 a rodada diaria rodava sozinha via **Agendador de Tarefas do Windows**. Desde 21/09/2026 ela roda no GitHub Actions (ver Visao Geral), e a Tarefa 1 abaixo nao deve ficar ativa junto — senao o Teams recebe os cards em dobro. A descricao fica registrada para o caso de precisar voltar ao modo local. A Tarefa 2 (limpeza da pasta local) pode continuar ativa.
 
 ### Dependencia do Power Automate
 
@@ -613,8 +617,8 @@ git diff --cached --name-only -z | xargs -0 grep -lI "erico.moraes\|BUNZL"
   base de extracao (contanto que o Comparativo rode ate 6h depois do Insight Funil)
 - a aba `Top Itens` do dashboard (secao 1 e 10) faz a remocao de ruido internamente, no proprio
   `gerar_top_itens_json.py`
-- a rodada diaria (seg-sex, 08:15) roda sozinha via Agendador de Tarefas do Windows, chamando
-  `rodar_fluxos_diarios.ps1`; a limpeza de arquivos antigos roda mensalmente (dia 1, 07:00) — ver secao 9
+- a rodada diaria (seg-sex, ~08:00) roda no GitHub Actions, no repositorio `analise-funil-automacao`; o
+  agendamento local pelo Windows (secao 9) esta desativado desde 21/09/2026
 - a identidade do Git usada nos commits deve ser `Erico Casarano <erico.casarano@exemplo.com>` — se um
   commit sair com outro autor (ex.: e-mail corporativo real), corrija antes de publicar
   (`git commit --amend --author="Erico Casarano <erico.casarano@exemplo.com>"`, so em commits ainda nao
