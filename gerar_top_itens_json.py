@@ -63,6 +63,37 @@ def format_money_short(value) -> str:
     return f"R$ {val:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def montar_itens_orcamento(itens_df: pd.DataFrame, num_orcamento: int) -> list:
+    grupo = itens_df[itens_df["IDOrcamentoPrinc"] == num_orcamento]
+    linhas = []
+    for _, row in grupo.iterrows():
+        valor_item = float(row.get("VlTot", 0) or 0)
+        quantidade = float(row.get("Quantidade", 0) or 0)
+        preco_tabela = float(row.get("PrecoTabela", 0) or 0)
+        preco_promocao = float(row.get("PrecoPromocao", 0) or 0)
+        preco_praticado = valor_item / quantidade if quantidade > 0 else 0.0
+        desconto_pct = (
+            round((preco_tabela - preco_praticado) / preco_tabela * 100, 2)
+            if preco_tabela > 0
+            else 0.0
+        )
+        linhas.append({
+            "codigo": str(row.get("CodigoErp", "") or "").strip(),
+            "descricao": str(row.get("Descricao", "") or "").strip(),
+            "quantidade": quantidade,
+            "quantidade_fmt": format_int(row.get("Quantidade", 0)),
+            "preco_tabela": format_money_short(preco_tabela),
+            "preco_tabela_numero": preco_tabela,
+            "preco_promocao": format_money_short(preco_promocao) if preco_promocao > 0 else "-",
+            "preco_praticado": format_money_short(preco_praticado),
+            "preco_praticado_numero": preco_praticado,
+            "desconto_pct": desconto_pct if preco_tabela > 0 else None,
+            "valor": format_money_short(valor_item),
+            "valor_numero": valor_item,
+        })
+    return linhas
+
+
 def montar_detalhe_item(itens: pd.DataFrame, working_df: pd.DataFrame, codigo: str, sufixo_classe: str) -> list:
     itens_codigo = itens[itens["CodigoErp"] == codigo]
     itens_agg = itens_codigo.groupby("IDOrcamentoPrinc", as_index=False).agg(
@@ -103,6 +134,8 @@ def montar_detalhe_item(itens: pd.DataFrame, working_df: pd.DataFrame, codigo: s
                 "valor_orcamento_fmt": format_money_short(row["Valor"]),
                 "pct_item_orcamento": pct_item_orcamento,
                 "passou_revisao_gestor": int(row["Revisao_Gestor"]) if "Revisao_Gestor" in row.index and pd.notna(row["Revisao_Gestor"]) else 0,
+                "status": str(row.get("Status_Atual", "") or "").strip(),
+                "itens": montar_itens_orcamento(itens, int(row["Num_Orcamento"])),
             }
         )
     return linhas
