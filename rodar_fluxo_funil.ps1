@@ -7,11 +7,6 @@ param(
   [string]$Ambiente = "Teste",
   [string]$StartDate = "",
   [string]$EndDate = "",
-  [ValidateSet("todas", "revisadas", "sem_revisao")]
-  [string]$TipoPerda = "",
-  [ValidateSet("criacao", "data_faturamento", "ambos")]
-  [string]$ModoDataItens = "",
-  [switch]$SkipItensPerdas,
   [switch]$NoSharePoint,
   [switch]$NoPublicarDashboard,
   [switch]$ForceRun
@@ -296,7 +291,7 @@ if ($resolvedCurrentPeriod.UsedDefault) {
 Write-Host "Mes comercial:" ($resolvedCurrentPeriod.CommercialStart.ToString("dd/MM/yyyy")) "a" ($resolvedCurrentPeriod.CommercialEnd.ToString("dd/MM/yyyy"))
 Write-Host "Periodo do insight:" ($resolvedCurrentPeriod.CurrentStart.ToString("dd/MM/yyyy")) "a" ($resolvedCurrentPeriod.CurrentEnd.ToString("dd/MM/yyyy"))
 
-$runGuardKey = "ambiente={0};start={1};end={2};tipo={3};mododata={4};skipstep2={5};nosharepoint={6}" -f $Ambiente, $effectiveStartDate, $effectiveEndDate, ($TipoPerda -or "config"), ($ModoDataItens -or "config"), [bool]$SkipItensPerdas, [bool]$NoSharePoint
+$runGuardKey = "ambiente={0};start={1};end={2};nosharepoint={3}" -f $Ambiente, $effectiveStartDate, $effectiveEndDate, [bool]$NoSharePoint
 if (-not (Start-RunGuard -Name "rodar_fluxo_funil" -Key $runGuardKey -Force:$ForceRun)) {
   return
 }
@@ -353,12 +348,6 @@ $configObj.inputs.ruidos = $arquivoRuido
 $configObj.inputs.itens = $arquivoItens
 $configObj.filters.start = $effectiveStartDate
 $configObj.filters.end = $effectiveEndDate
-if ($TipoPerda) {
-  $configObj.filters.tipo_perda = $TipoPerda
-}
-if ($ModoDataItens) {
-  $configObj.filters.modo_data_itens = $ModoDataItens
-}
 
 $configTemp = Join-Path $entradaDir ("automacao_config_power_automate_{0}.json" -f $timestamp)
 $configObj | ConvertTo-Json -Depth 20 | Set-Content $configTemp -Encoding UTF8
@@ -368,13 +357,8 @@ try {
   $runStep1Start = Get-Date
   $pipelineArgs = @(
     ".\automacao_pipeline.py",
-    "--config", $configTemp,
-    "--resume-from", "step1"
+    "--config", $configTemp
   )
-  if ($SkipItensPerdas) {
-    $pipelineArgs += "--skip-step2"
-    Write-Host "SkipItensPerdas informado. O arquivo de itens e perdas nao sera gerado nesta rodada."
-  }
   Invoke-Python -PythonExecutable $pythonExe -Arguments $pipelineArgs
 
   $oportunidadesGerado = Get-LatestFileAfter -Directory ".\historico" -Pattern "oportunidades_reais_auto_*.xlsx" -After $runStep1Start
