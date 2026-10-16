@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
-<script src="./data/comparativo_dashboard.js"></script>
-<script src="./data/resumo_insight_dashboard.js"></script>
-<script src="./data/top_itens_dashboard.js"></script>
-<script src="./data/historico_dashboard.js"></script>
+<script src="https://bunzlbr.sharepoint.com/:u:/r/sites/InsightsVendas/Documentos%20Compartilhados/Producao/StaticWebApp/comparativo_dashboard.js?d=wcb1370849edf402bb9f5c5a5e102238d&csf=1&web=1&e=blbV6Y" onerror="window.__COMPARATIVO_DATA_FAILED = true;"></script>
+<script src="https://bunzlbr.sharepoint.com/:u:/r/sites/InsightsVendas/Documentos%20Compartilhados/Producao/StaticWebApp/resumo_insight_dashboard.js?d=wace37474b95349bba0eeda688649cb00&csf=1&web=1&e=bo635p" onerror="window.__RESUMO_DATA_FAILED = true;"></script>
+<script src="https://bunzlbr.sharepoint.com/:u:/r/sites/InsightsVendas/Documentos%20Compartilhados/Producao/StaticWebApp/top_itens_dashboard.js?d=w108bfa0aec2849c98b7616edc1a5a0ad&csf=1&web=1&e=Vcd9fB" onerror="window.__TOPITENS_DATA_FAILED = true;"></script>
+<script src="https://bunzlbr.sharepoint.com/:u:/r/sites/InsightsVendas/Documentos%20Compartilhados/Producao/StaticWebApp/historico_dashboard.js?d=w40531f7e429949d59ff24a7dc0336331&csf=1&web=1&e=0LNPWe" onerror="window.__HISTORICO_DATA_FAILED = true;"></script>
 </head>
 <body>
 <x-dc>
@@ -66,7 +66,7 @@
 </style>
 </helmet>
 
-<div ref="{{ rootRef }}" style="width:100vw;height:100vh;min-width:100vw;min-height:100vh;position:relative;background:radial-gradient(120% 120% at 50% 0%, #EDF1FA 0%, #DEE4F2 100%);overflow:hidden;">
+<div id="df-dashboard-root" ref="{{ rootRef }}" style="width:100vw;height:100vh;min-width:100vw;min-height:100vh;position:relative;background:radial-gradient(120% 120% at 50% 0%, #EDF1FA 0%, #DEE4F2 100%);overflow:hidden;visibility:{{ rootVisibility }};">
   <div style="width:1920px;height:1080px;position:absolute;left:50%;top:50%;transform:translate(-50%, -50%) scale({{ scale }});transform-origin:center center;background:#F4F6FC;overflow:hidden;">
 
     <!-- ambient brand wash -->
@@ -633,12 +633,13 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;showUplift&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
 class Component extends DCLogic {
-  state = { scale: 1, screen: 'conversao', modalAberto: false, modalItem: null, modalOrcamentoAberto: false, modalOrcamento: null, modalStatusAberto: false, modalStatus: null, modalHistoricoAberto: false };
+  state = { scale: 1, screen: 'conversao', modalAberto: false, modalItem: null, modalOrcamentoAberto: false, modalOrcamento: null, modalStatusAberto: false, modalStatus: null, modalHistoricoAberto: false, dashboardVisible: false };
 
   constructor(props){
     super(props);
     this.rootRef = React.createRef();
     this._raf = null;
+    window.__dcDashboard = this;
   }
 
   componentDidMount(){
@@ -1429,6 +1430,7 @@ class Component extends DCLogic {
     return {
       rootRef: this.rootRef,
       scale: this.state.scale,
+      rootVisibility: this.state.dashboardVisible ? 'visible' : 'hidden',
       replay: () => this.animate(),
       showUplift: this.props.showUplift ?? true,
       isConversao,
@@ -1469,6 +1471,137 @@ class Component extends DCLogic {
     };
   }
 }
+</script>
+
+<style>
+  .df-noaccess-modal{
+    position:fixed;
+    inset:0;
+    z-index:70;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:32px;
+    background:rgba(10,22,52,0.55);
+    backdrop-filter:blur(10px);
+  }
+  .df-noaccess-modal.is-open{
+    display:flex;
+  }
+  .df-noaccess-modal-dialog{
+    width:min(440px, calc(100vw - 48px));
+    border-radius:24px;
+    border:1px solid #E7EBF5;
+    background:linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(246,249,255,0.97) 100%);
+    box-shadow:0 30px 70px rgba(17,32,78,0.24);
+    padding:32px 28px 26px;
+    text-align:center;
+  }
+  .df-noaccess-emoji{
+    font-size:44px;
+    line-height:1;
+    margin-bottom:14px;
+  }
+  .df-noaccess-title{
+    font-size:19px;
+    font-weight:800;
+    color:#0E1A3A;
+    margin-bottom:10px;
+  }
+  .df-noaccess-body{
+    font-size:13.5px;
+    color:#5B6478;
+    line-height:1.5;
+    margin-bottom:22px;
+  }
+  .df-noaccess-actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .df-noaccess-btn{
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    border-radius:10px;
+    padding:10px 16px;
+    cursor:pointer;
+    border:1px solid #E7EBF5;
+    display:inline-block;
+    text-decoration:none;
+  }
+  .df-noaccess-btn.primary{
+    background:#2B50F0;
+    color:#fff;
+    border-color:#2B50F0;
+  }
+  .df-noaccess-btn.secondary{
+    background:#fff;
+    color:#0E1A3A;
+  }
+</style>
+
+<div id="df-noaccess-modal" class="df-noaccess-modal" aria-hidden="true">
+  <div class="df-noaccess-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="df-noaccess-title">
+    <div class="df-noaccess-emoji">🔒</div>
+    <div id="df-noaccess-title" class="df-noaccess-title">Entre com sua conta corporativa</div>
+    <div class="df-noaccess-body">O Resumo Atual, o Comparativo e o Top Itens contêm informações comerciais de uso interno. Para visualizar esses dados, você precisa estar conectado à sua conta corporativa Microsoft e ter permissão de acesso.
+      <br><br>
+      <strong>Já tem permissão?</strong>
+      <ol style="text-align:left;margin:10px auto 0;padding-left:20px;max-width:380px;">
+        <li>Clique em <strong>Acessar SharePoint</strong> e faça login, se solicitado.</li>
+        <li>Volte para esta página e clique em <strong>Recarregar página</strong>.</li>
+      </ol>
+    </div>
+    <div class="df-noaccess-actions">
+      <a id="df-noaccess-sharepoint" class="df-noaccess-btn primary" href="https://bunzlbr.sharepoint.com/sites/InsightsVendas" target="_blank" rel="noopener">Acessar SharePoint</a>
+      <button id="df-noaccess-reload" class="df-noaccess-btn secondary" type="button">Recarregar página</button>
+    </div>
+  </div>
+</div>
+<script>
+  var __dashboardRevealed = false;
+  function __revealDashboard() {
+    if (__dashboardRevealed) return;
+    if (window.__dcDashboard) {
+      __dashboardRevealed = true;
+      window.__dcDashboard.setState({ dashboardVisible: true });
+    } else {
+      setTimeout(__revealDashboard, 100);
+    }
+  }
+  function __showNoAccessModal() {
+    var __noAccessModal = document.getElementById('df-noaccess-modal');
+    if (__noAccessModal) {
+      __noAccessModal.classList.add('is-open');
+      __noAccessModal.setAttribute('aria-hidden', 'false');
+    }
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('#df-noaccess-reload')) {
+      window.location.reload();
+    }
+  });
+  var __accessCheckAttempts = 0;
+  var __maxAccessCheckAttempts = 16; // 16 x 500ms = 8s
+  function __pollDashboardAccess() {
+    if (window.__COMPARATIVO_DATA_FAILED || window.__RESUMO_DATA_FAILED || window.__TOPITENS_DATA_FAILED) {
+      __showNoAccessModal();
+      return;
+    }
+    if (window.WIN_RATE_COMPARATIVO_DATA && window.WIN_RATE_RESUMO_ATUAL_DATA && window.WIN_RATE_TOP_ITENS_DATA) {
+      __revealDashboard();
+      return;
+    }
+    __accessCheckAttempts++;
+    if (__accessCheckAttempts >= __maxAccessCheckAttempts) {
+      __showNoAccessModal();
+      return;
+    }
+    setTimeout(__pollDashboardAccess, 500);
+  }
+  __pollDashboardAccess();
 </script>
 </body>
 </html>

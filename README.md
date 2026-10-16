@@ -633,9 +633,19 @@ O dashboard interativo (`Dashboard Analise Funil\dashboard_analise_funil.dc.html
 - Os links de compartilhamento do SharePoint embutidos no `docs\index.html` continuarem validos — se forem revogados/expirarem, e preciso gerar novos links e atualizar os `<script src>` no arquivo.
 - O GitHub Pages estar habilitado nas configuracoes do repositorio (Settings → Pages → Branch `main`, pasta `/docs`).
 
-### Limitacao atual
+### Atualizando a versao publica
 
-Como `docs\index.html` e uma copia estatica do `.dc.html`, qualquer mudanca visual feita no dashboard local precisa ser replicada manualmente em `docs\index.html` (trocando so os 3 `<script src>` de volta pros links do SharePoint, mais o bloco do modal de sem-acesso e o gate de `dashboardVisible`) pra a versao publica acompanhar.
+`docs\index.html` nao deve ser editado nem copiado a mao. Ele e gerado a partir do `.dc.html` pelo `publicar_docs.py`, que aplica as 3 adaptacoes da versao publica: os 4 `<script src>` apontando pros links do SharePoint, o gate de `dashboardVisible` e o modal de sem-acesso (guardado em `publicacao\bloco_sem_acesso.html`).
+
+Depois de qualquer mudanca visual no dashboard local:
+
+```powershell
+cd C:\analise_funil
+py -3.12 .\publicar_docs.py           # regenera docs\index.html
+py -3.12 .\publicar_docs.py --check   # so confere se esta em dia (nao grava)
+```
+
+Se um link de compartilhamento do SharePoint mudar, atualize `FONTES_DADOS` no `publicar_docs.py` e rode de novo. Se o `.dc.html` mudar a ponto de alguma adaptacao nao encaixar mais, o script para com erro em vez de gerar uma versao publica quebrada.
 
 ## 11. Publicando uma mudanca de codigo
 
