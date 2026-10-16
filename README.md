@@ -13,17 +13,19 @@ Regra de ordem da publicacao:
 1. primeiro publicar o `Insight Funil`
 2. depois publicar o `Comparativo`
 
-No desenho atual da automacao local:
+### Onde roda cada parte
 
-- `rodar_fluxo_funil.ps1` e o fluxo principal da rodada
-- `rodar_fluxo_comparativo_funil.ps1` gera o comparativo
+**Producao (desde 21/09/2026): GitHub Actions**, no repositorio privado `dashboard-laborhs/analise-funil-automacao`. Todo dia util, por volta das 08:00, o Power Automate extrai os 2 DAX do Power BI, commita `dax1.json`/`dax2.json` nesse repositorio e dispara os 3 workflows (Diario, Comparativo e Historico). Cada workflow roda os mesmos scripts Python deste projeto e devolve o resultado a um flow do Power Automate, que grava no SharePoint. O passo a passo da configuracao esta no README daquele repositorio.
 
-Modo de operacao atual:
+**Este repositorio** guarda:
 
-- o Power Automate executa as consultas DAX no Power BI e grava os JSONs na pasta de extracao sincronizada
-- a execucao local dos scripts acontece manualmente, por comando, em `Teste` ou `Producao`
+- o dashboard (`Dashboard Analise Funil\`) e a versao publica em `docs\` (GitHub Pages, ver secao 10)
+- os scripts Python, iguais aos do repositorio de automacao (mudanca na logica de producao precisa ir para os dois)
+- o **modo local** (`rodar_fluxo_funil.ps1`, `rodar_fluxo_comparativo_funil.ps1`, `rodar_fluxos_diarios.ps1`), que roda o mesmo processamento na maquina, por comando — util para testes, reprocessamentos e como contingencia se o GitHub Actions ficar indisponivel
 
-## Diagrama do Fluxo
+O diagrama abaixo e as secoes 1, 2, 7 e 9 descrevem o modo local.
+
+## Diagrama do Fluxo (modo local)
 
 ```mermaid
 flowchart TD
@@ -34,7 +36,7 @@ flowchart TD
 
     subgraph FLUXO1["Fluxo 1 — Insight Funil"]
         F1START --> T1["tratar_dax_orcamentos/itens_json_power_automate.py"]
-        T1 --> P1["automacao_pipeline.py<br/>remove ruido + nao convertidos"]
+        T1 --> P1["automacao_pipeline.py<br/>remove ruido"]
         P1 --> I1["gerar_resumo_insight_json.py"]
         I1 --> J1["resumo_insight_card_teams_*.json"]
         J1 --> TEAMS1["Power Automate posta<br/>Adaptive Card no Teams"]
@@ -153,7 +155,6 @@ Objetivo: gerar o JSON final do resumo executivo do funil e enviar para a pasta 
 - `entrada\dax_orcamentos_tratado_power_automate_YYYYMMDD_HHMMSS.xlsx`
 - `entrada\dax_itens_tratado_power_automate_YYYYMMDD_HHMMSS.xlsx`
 - `historico\oportunidades_reais_auto_YYYYMMDD_HHMMSS.xlsx`
-- `historico\itens_perdas_reais_auto_YYYYMMDD_HHMMSS.xlsx`
 - `alertas\resumo_insight_card_teams_YYYYMMDD_HHMMSS.json`
 - `alertas\top_itens_card_teams_YYYYMMDD_HHMMSS.json`
 - `.ultima_base_funil.json` (na raiz do projeto)
@@ -161,67 +162,9 @@ Objetivo: gerar o JSON final do resumo executivo do funil e enviar para a pasta 
   - lido pelo `rodar_fluxo_comparativo_funil.ps1` pra garantir que o Comparativo nasca da mesma base (ver Fluxo 2)
   - nao entra no Git (esta no `.gitignore`), e regenerado a cada rodada
 
-### Regra padrao dos nao convertidos
-
-Por padrao, o arquivo `historico\itens_perdas_reais_auto_YYYYMMDD_HHMMSS.xlsx` considera orcamentos com `Faturou = 0`, `Aprovado pelo Cliente = 0` e status de recusa/cancelamento, sem filtrar revisao do gestor.
-
-No arquivo de oportunidades, `Aprovado pelo Cliente` vem da coluna `ETAPA 3 FUNIL Aprovados pelo Cliente`. Portanto, o padrao do step 2 remove da base de nao convertidas os casos que ja foram aprovados pelo cliente mas ainda nao faturaram.
-
-Status considerados em `Base_Nao_Convertidas` e `Itens_Nao_Convertidas`:
-
-- `Cancelado por Inatividade`
-- `Orçamento Cancelado`
-- `Em confecção`
-
-A configuracao fica em `automacao_config.json`:
-
-```json
-"filters": {
-  "tipo_perda": "todas"
-}
-```
-
-Opcoes aceitas pelo script de itens nao convertidos: `todas`, `revisadas`, `sem_revisao`.
-
-### Saida detalhada do step 2
-
-O step 2 gera o arquivo `historico\itens_perdas_reais_auto_YYYYMMDD_HHMMSS.xlsx`.
-
-Abas principais:
-
-- `Base_Nao_Convertidas`: orcamentos com `Faturou = 0`, `Aprovado pelo Cliente = 0` e status de recusa/cancelamento, respeitando `tipo_perda`.
-- `Itens_Nao_Convertidas`: itens desses orcamentos.
-- `Base_Faturados`: orcamentos com `Faturou = 1`, no mesmo recorte de revisao.
-- `Itens_Faturados`: itens dos orcamentos faturados.
-
-Rankings mantidos: `Ranking_Geral_Final`, `Ranking_Geral_Revenda`, `Ranking_Geral_Final_Faturados`, `Ranking_Geral_Revenda_Faturados`, `Ranking_Itens_Por_Vendedor`, `Ranking_Itens_Por_Mes`, `Ranking_Itens_Vendedor_Mes`, abas `Top10_<Vendedor>`.
-
-Abas removidas para simplificar o arquivo: `Ranking_Itens_Geral`, `Ranking_Itens_Geral_Tipo`, `Ranking_NC_Recusa_Tipo`, `Ranking_NC_Recusa_Final`, `Ranking_NC_Recusa_Revenda`, `Base_NC_Recusa_Cliente`, `Itens_NC_Recusa_Cliente`, `Analise_Preco_Recusa`, `Ranking_Itens_Tipo_Faturados`.
-
-### Precos e classificacao no step 2
-
-Colunas de preco nos rankings:
-
-- `Preco_Ponderado`: `Valor_Total / Volume_Total`.
-- `Preco_Media_Orcamento`: media dos precos calculados por orcamento.
-- `Preco_Mediana_Orcamento`: mediana dos precos calculados por orcamento.
-
-Na aba `Analise_Preco_Itens`, as mesmas visoes aparecem separadas para faturados e nao convertidos.
-
-A `Classificacao_Preco` usa a mediana por orcamento como referencia principal (limite de 3%):
-
-- `Dif_Preco_Mediana_% >= 3%` e `Win_Rate_Item_% < 50%`: `Possivel sensibilidade a preco`.
-- `Dif_Preco_Mediana_% >= 3%`: `Atencao: preco nao convertido maior`.
-- `Dif_Preco_Mediana_% <= -3%`: `Nao convertido com preco menor`.
-- diferenca entre `-3%` e `+3%`: `Preco similar`.
-- menos de 3 orcamentos faturados ou menos de 3 nao convertidos: `Amostra insuficiente`.
-
-A media ponderada permanece disponivel como referencia financeira/volume.
-
 ### Pipeline tecnico atualmente utilizado
 
-- `step1`: `gerar_oportunidades_reais_codes.py` — consolidacao das oportunidades reais
-- `step2`: `gerar_itens_perdas_reais.py` — nao convertidos e rankings de itens
+- `step1`: `gerar_oportunidades_reais_codes.py` — consolidacao das oportunidades reais (unica etapa; o antigo step 2, `gerar_itens_perdas_reais.py`, foi removido por nao ser usado)
 
 ### Arquivos esperados na extracao
 
@@ -253,7 +196,7 @@ A media ponderada permanece disponivel como referencia financeira/volume.
 - `Faturado`
 - `Enviados_Cliente_Nao_Aprovado` — orcamento foi enviado pra aprovacao do cliente e nunca faturou
 
-Essa classificacao **e diferente** da regra de `Base_Nao_Convertidas` do step 2 (secao acima): aqui nao ha filtro por status especifico de recusa/cancelamento, e a categoria de "nao aprovado" e mais ampla de proposito — a analise e por item (Top 5 por quantidade de orcamentos, volume e valor, faturado x nao aprovado), nao pelo funil inteiro. Roda de forma independente do step 2 e nao e afetada por `-SkipItensPerdas`.
+Aqui nao ha filtro por status especifico de recusa/cancelamento, e a categoria de "nao aprovado" e ampla de proposito — a analise e por item (Top 5 por quantidade de orcamentos, volume e valor, faturado x nao aprovado), nao pelo funil inteiro.
 
 Alimenta a aba `Top Itens` do dashboard (ver secao 10), com ranking, detalhe por orcamento (preco praticado, tipo de cliente, revisao do gestor) e ordenacao clicavel nas colunas.
 
@@ -339,10 +282,6 @@ Na pratica, isso garante que **Insight Funil e Comparativo nascam sempre da mesm
 Comparativo rode logo depois do Insight Funil (dentro da mesma janela de 6h) — o que ja e a ordem de
 publicacao recomendada.
 
-### Observacao sobre nao convertidas no comparativo
-
-Quando o comparativo executa o pipeline auxiliar, ele tambem respeita a regra padrao de nao convertidas: `Faturou = 0`, `Aprovado pelo Cliente = 0`, status de recusa/cancelamento e `tipo_perda = todas`. A troca entre `Teste` e `Producao` muda apenas o destino de publicacao; a regra de calculo continua a mesma.
-
 ### Regra de mes comercial no comparativo
 
 - o comparativo usa a mesma logica de mes comercial do fluxo principal
@@ -393,17 +332,19 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 ## 3. Fluxos Power Automate
 
-Recomendacao de organizacao:
+Na producao (GitHub Actions):
 
-- `Fluxo 1 - Extracao DAX Power BI`
-  Funcao: executar DAX 1 e DAX 2 e salvar arquivos brutos em `/Entrada/FunilExtracao`.
-  Observacao: a extracao deve cobrir a janela necessaria para atender o `Insight Funil` e o `Comparativo` na mesma rodada.
+- `Flow A - Extracao DAX`
+  Funcao: executar DAX 1 e DAX 2, commitar `dax1.json`/`dax2.json` no repositorio `analise-funil-automacao` e disparar os 3 workflows.
+  Observacao: a extracao deve cobrir a janela necessaria para o `Insight Funil`, o `Comparativo` e o mes que acabou de fechar.
 
-- `Fluxo 2 - Publicacao Insight Diario`
-  Funcao: monitorar a pasta final do `Insight Funil` e postar o Adaptive Card no Teams.
+- `Flow B`, `Flow B2` e `Flow B3` (gatilho HTTP)
+  Funcao: receber o resultado do Fluxo Diario, do Comparativo e do Historico e gravar no SharePoint (`Producao/StaticWebApp`, `Producao/FunilInsights`, `Producao/FunilComparativos`).
 
-- `Fluxo 3 - Publicacao Comparativo`
-  Funcao: monitorar a pasta final de comparativo e postar o Adaptive Card comparativo no Teams.
+- `Publicacao Insight Diario` e `Publicacao Comparativo`
+  Funcao: monitorar `FunilInsights` e `FunilComparativos` e postar os Adaptive Cards no Teams (o do Insight tambem envia e-mail).
+
+No modo local, o Flow A grava os JSONs brutos em `/Entrada/FunilExtracao` e os `.ps1` copiam os resultados direto para as pastas sincronizadas do SharePoint.
 
 ## 4. Resumo Mensal Historico (auxiliar)
 
@@ -492,12 +433,12 @@ Sugestao de organizacao:
 
 - `rodar_fluxo_funil.ps1` — quando quiser executar a rodada principal do funil e gerar o `Insight Funil`
 - `rodar_fluxo_comparativo_funil.ps1` — quando quiser gerar o comparativo depois da rodada principal
-- `rodar_fluxos_diarios.ps1` — roda os dois em sequencia (usado pela automacao agendada, ver secao 9)
+- `rodar_fluxos_diarios.ps1` — roda os dois em sequencia (era usado pela automacao agendada local, ver secao 9)
 - `gerar_resumo_mensal_funil.py` — quando quiser gerar uma visao historica mensal auxiliar da base, em mes comercial ou calendario
 
 Observacao operacional:
 
-- o uso diario normal e automatico via Agendador de Tarefas do Windows (ver secao 9); tambem da pra rodar manualmente a qualquer momento, primeiro `Insight Funil`, depois `Comparativo`
+- o uso diario normal e automatico, no GitHub Actions (ver Visao Geral); os comandos locais servem para testes e contingencia, sempre primeiro `Insight Funil`, depois `Comparativo`
 - a extracao base ja deve ter sido gerada pelo Power Automate antes dos comandos locais
 - no modo padrao: `Insight Funil` considera mes comercial atual ate ontem; `Comparativo` considera mes comercial atual ate ontem versus periodo equivalente do mes comercial anterior por dias uteis; `Resumo Mensal Funil` usa o modo `comercial`, salvo quando `--modo calendario` for informado
 
@@ -519,14 +460,14 @@ Comandos mais usados no dia a dia:
 
 ```powershell
 # Fluxo 1 (Insight Funil) - teste rapido, sem publicar nada
-.\rodar_fluxo_funil.ps1 -Ambiente Teste -SkipItensPerdas -NoSharePoint
+.\rodar_fluxo_funil.ps1 -Ambiente Teste -NoSharePoint
 
 # Fluxo 1 - producao real (posta no Teams, publica no dashboard)
-.\rodar_fluxo_funil.ps1 -Ambiente Producao -SkipItensPerdas
+.\rodar_fluxo_funil.ps1 -Ambiente Producao
 
 # Fluxo 2 (Comparativo) - mesma logica
-.\rodar_fluxo_comparativo_funil.ps1 -Ambiente Teste -SkipItensPerdas -NoPublicarComparativo
-.\rodar_fluxo_comparativo_funil.ps1 -Ambiente Producao -SkipItensPerdas
+.\rodar_fluxo_comparativo_funil.ps1 -Ambiente Teste -NoPublicarComparativo
+.\rodar_fluxo_comparativo_funil.ps1 -Ambiente Producao
 
 # Os dois em sequencia (o mesmo comando que a automacao agendada roda)
 .\rodar_fluxos_diarios.ps1 -Ambiente Producao
@@ -540,7 +481,6 @@ Comandos mais usados no dia a dia:
 .\gerar_resumo_mensal_funil.py -i ".\entrada\dax1_jan_maio.xlsx" -it ".\entrada\dax2_jan_maio.xlsx" --start 2026-03-31 --end 2026-04-29 -o resumo_comercial_abril
 ```
 
-> `-SkipItensPerdas` pula a etapa mais lenta (rankings/itens perdidos, ~5-7min) — seguro de usar porque o JSON final e o dashboard nao dependem dela. Sem esse parametro, o fluxo tambem gera o Excel completo em `historico\itens_perdas_reais_auto_*.xlsx`.
 
 ## 8. Integracao com o Power Automate
 
@@ -557,9 +497,9 @@ O PowerShell do `Comparativo`:
 3. copia o comparativo para a pasta sincronizada correta
 4. deixa o Power Automate assumir a postagem no Teams
 
-## 9. Automacao Agendada (Task Scheduler)
+## 9. Automacao Agendada local (Task Scheduler) — desativada
 
-A rodada diaria roda sozinha, via **Agendador de Tarefas do Windows**, sem precisar de comando manual.
+Ate 18/09/2026 a rodada diaria rodava sozinha via **Agendador de Tarefas do Windows**. Desde 21/09/2026 ela roda no GitHub Actions (ver Visao Geral), e a Tarefa 1 abaixo nao deve ficar ativa junto — senao o Teams recebe os cards em dobro. A descricao fica registrada para o caso de precisar voltar ao modo local. A Tarefa 2 (limpeza da pasta local) pode continuar ativa.
 
 ### Dependencia do Power Automate
 
@@ -567,7 +507,7 @@ O fluxo do Power Automate que extrai as consultas DAX roda de **segunda a sexta,
 
 ### `rodar_fluxos_diarios.ps1`
 
-Script wrapper que roda o `Insight Funil` e, se terminar sem erro, na sequencia o `Comparativo` — ambos com `-SkipItensPerdas` (a etapa de itens/rankings nao e usada pelo JSON final nem pelo dashboard, entao pular ela deixa a rodada bem mais rapida). Se o Fluxo 1 falhar, o Fluxo 2 nao roda.
+Script wrapper que roda o `Insight Funil` e, se terminar sem erro, na sequencia o `Comparativo`. Se o Fluxo 1 falhar, o Fluxo 2 nao roda.
 
 Depois que os dois fluxos terminam com sucesso, roda mais dois passos, ambos so-leitura/gravacao local (nenhum dos dois refaz a extracao):
 
@@ -675,10 +615,10 @@ git diff --cached --name-only -z | xargs -0 grep -lI "erico.moraes\|BUNZL"
 - no fim de cada rodada os scripts exibem os principais arquivos gerados
 - desde a correcao do `.ultima_base_funil.json`, o Insight Funil e o Comparativo sempre nascem da mesma
   base de extracao (contanto que o Comparativo rode ate 6h depois do Insight Funil)
-- a aba `Top Itens` do dashboard (secao 1 e 10) nao depende do step 2 (`itens_perdas`) nem e afetada por
-  `-SkipItensPerdas` — a remocao de ruido e feita internamente pelo proprio `gerar_top_itens_json.py`
-- a rodada diaria (seg-sex, 08:15) roda sozinha via Agendador de Tarefas do Windows, chamando
-  `rodar_fluxos_diarios.ps1`; a limpeza de arquivos antigos roda mensalmente (dia 1, 07:00) — ver secao 9
+- a aba `Top Itens` do dashboard (secao 1 e 10) faz a remocao de ruido internamente, no proprio
+  `gerar_top_itens_json.py`
+- a rodada diaria (seg-sex, ~08:00) roda no GitHub Actions, no repositorio `analise-funil-automacao`; o
+  agendamento local pelo Windows (secao 9) esta desativado desde 21/09/2026
 - a identidade do Git usada nos commits deve ser `Erico Casarano <erico.casarano@exemplo.com>` — se um
   commit sair com outro autor (ex.: e-mail corporativo real), corrija antes de publicar
   (`git commit --amend --author="Erico Casarano <erico.casarano@exemplo.com>"`, so em commits ainda nao

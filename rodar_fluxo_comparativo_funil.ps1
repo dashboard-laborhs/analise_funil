@@ -8,9 +8,6 @@ param(
   [string]$Ambiente = "Teste",
   [string]$StartDate = "",
   [string]$EndDate = "",
-  [ValidateSet("criacao", "data_faturamento", "ambos")]
-  [string]$ModoDataItens = "",
-  [switch]$SkipItensPerdas,
   [switch]$NoPublicarComparativo,
   [switch]$NoPublicarDashboard,
   [switch]$ForceRun
@@ -313,7 +310,6 @@ function New-TempConfig {
     [string]$ArquivoItens,
     [string]$StartDate,
     [string]$EndDate,
-    [string]$ModoDataItens,
     [string]$Suffix
   )
 
@@ -322,9 +318,6 @@ function New-TempConfig {
   $tempConfig.inputs.itens = $ArquivoItens
   $tempConfig.filters.start = $StartDate
   $tempConfig.filters.end = $EndDate
-  if ($ModoDataItens) {
-    $tempConfig.filters.modo_data_itens = $ModoDataItens
-  }
 
   $configPath = Join-Path ".\entrada" ("automacao_config_comparativo_{0}_{1}.json" -f $Suffix, (Get-Date -Format "yyyyMMdd_HHmmss"))
   $tempConfig | ConvertTo-Json -Depth 20 | Set-Content $configPath -Encoding UTF8
@@ -399,7 +392,7 @@ Write-Host "Mes comercial anterior:" ($previousCommercialPeriod.CommercialStart.
 Write-Host "Periodo anterior equivalente:" ($equivalent.PreviousStart.ToString("dd/MM/yyyy")) "a" ($equivalent.PreviousEnd.ToString("dd/MM/yyyy"))
 Write-Host "Dias uteis considerados:" $diasUteis
 
-$runGuardKey = "ambiente={0};start={1};end={2};prevstart={3};prevend={4};mododata={5};skipstep2={6};nopublicar={7}" -f $Ambiente, $startDateStr, $endDateStr, $previousStartStr, $previousEndStr, ($ModoDataItens -or "config"), [bool]$SkipItensPerdas, [bool]$NoPublicarComparativo
+$runGuardKey = "ambiente={0};start={1};end={2};prevstart={3};prevend={4};nopublicar={5}" -f $Ambiente, $startDateStr, $endDateStr, $previousStartStr, $previousEndStr, [bool]$NoPublicarComparativo
 if (-not (Start-RunGuard -Name "rodar_fluxo_comparativo_funil" -Key $runGuardKey -Force:$ForceRun)) {
   return
 }
@@ -470,20 +463,15 @@ $configTempA = $null
 $configTempB = $null
 
 try {
-  $configTempA = New-TempConfig -BaseConfig $configObj -ArquivoRuido $arquivoRuido -ArquivoItens $arquivoItens -StartDate $previousStartStr -EndDate $previousEndStr -ModoDataItens $ModoDataItens -Suffix "periodo_a"
-  $configTempB = New-TempConfig -BaseConfig $configObj -ArquivoRuido $arquivoRuido -ArquivoItens $arquivoItens -StartDate $startDateStr -EndDate $endDateStr -ModoDataItens $ModoDataItens -Suffix "periodo_b"
+  $configTempA = New-TempConfig -BaseConfig $configObj -ArquivoRuido $arquivoRuido -ArquivoItens $arquivoItens -StartDate $previousStartStr -EndDate $previousEndStr -Suffix "periodo_a"
+  $configTempB = New-TempConfig -BaseConfig $configObj -ArquivoRuido $arquivoRuido -ArquivoItens $arquivoItens -StartDate $startDateStr -EndDate $endDateStr -Suffix "periodo_b"
 
   $runAStart = Get-Date
   Write-Host "Executando pipeline do periodo anterior..."
   $pipelineArgsA = @(
     ".\automacao_pipeline.py",
-    "--config", $configTempA,
-    "--resume-from", "step1"
+    "--config", $configTempA
   )
-  if ($SkipItensPerdas) {
-    $pipelineArgsA += "--skip-step2"
-    Write-Host "SkipItensPerdas informado. O arquivo de itens e perdas nao sera gerado nesta rodada."
-  }
   Invoke-Python -PythonExecutable $pythonExe -Arguments $pipelineArgsA
 
   $oportunidadesA = Get-LatestFileAfter -Directory ".\historico" -Pattern "oportunidades_reais_auto_*.xlsx" -After $runAStart
@@ -506,12 +494,8 @@ try {
   Write-Host "Executando pipeline do periodo atual..."
   $pipelineArgsB = @(
     ".\automacao_pipeline.py",
-    "--config", $configTempB,
-    "--resume-from", "step1"
+    "--config", $configTempB
   )
-  if ($SkipItensPerdas) {
-    $pipelineArgsB += "--skip-step2"
-  }
   Invoke-Python -PythonExecutable $pythonExe -Arguments $pipelineArgsB
 
   $oportunidadesB = Get-LatestFileAfter -Directory ".\historico" -Pattern "oportunidades_reais_auto_*.xlsx" -After $runBStart

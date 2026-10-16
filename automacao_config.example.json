@@ -1,4 +1,3 @@
-
 {
   "python_executable": "py -3.12",
   "paths": {
@@ -7,8 +6,7 @@
     "dashboard_analise_funil_publish_dir": "C:\\CAMINHO\\PARA\\Producao\\StaticWebApp"
   },
   "scripts": {
-    "step1": "./gerar_oportunidades_reais_codes.py",
-    "step2": "./gerar_itens_perdas_reais.py"
+    "step1": "./gerar_oportunidades_reais_codes.py"
   },
   "inputs": {
     "ruidos": "./entrada/dax1_remocao_ruidos_base.xlsx",
@@ -16,23 +14,16 @@
   },
   "outputs": {
     "oportunidades_stem": "oportunidades_reais_auto",
-    "itens_perdas_stem": "itens_perdas_reais_auto",
     "sheet_oportunidades": "Lista_Oportunidades_Reais"
   },
   "filters": {
     "start": "",
-    "end": "",
-    "tipo_perda": "todas",
-    "modo_data_itens": "criacao"
+    "end": ""
   },
   "cluster": {
     "delta_horas": 360,
     "sim_min": 0.5,
     "debug_id": null
-  },
-  "rankings": {
-    "top": 50,
-    "top_vendedor": 10
   },
   "alerts": {
     "enabled": true,

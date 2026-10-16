@@ -154,7 +154,7 @@ try {
 
   Write-Host "=== Iniciando Fluxo 1 (Insight Funil) - $Ambiente ==="
   try {
-    & ".\rodar_fluxo_funil.ps1" -Ambiente $Ambiente -SkipItensPerdas
+    & ".\rodar_fluxo_funil.ps1" -Ambiente $Ambiente
   }
   catch {
     Write-Host "ERRO no Fluxo 1: $_"
@@ -165,7 +165,7 @@ try {
   Write-Host ""
   Write-Host "=== Fluxo 1 concluido. Iniciando Fluxo 2 (Comparativo) - $Ambiente ==="
   try {
-    & ".\rodar_fluxo_comparativo_funil.ps1" -Ambiente $Ambiente -SkipItensPerdas
+    & ".\rodar_fluxo_comparativo_funil.ps1" -Ambiente $Ambiente
   }
   catch {
     Write-Host "ERRO no Fluxo 2: $_"
