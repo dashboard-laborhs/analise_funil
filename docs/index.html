@@ -495,12 +495,13 @@
 <div onClick="{{ pararPropagacao }}" style="background:#fff;border-radius:20px;width:1750px;max-height:820px;padding:32px;box-shadow:0 24px 60px rgba(24,38,90,0.25);display:flex;flex-direction:column;gap:18px;animation:modalDialogIn .22s cubic-bezier(0.16,1,0.3,1);">
 <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
 <span id="modal-titulo" style="font-size:20px;font-weight:700;color:#0E1A3A;">-</span>
-<button onClick="{{ fecharModal }}" style="border:none;background:#F1F5FF;border-radius:10px;width:32px;height:32px;font-size:16px;cursor:pointer;color:#5B6478;flex:none;" aria-label="Fechar">×</button>
+<div style="display:flex;align-items:center;gap:18px;flex:none;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#7C88A6;">Tipo cliente</span><div role="radiogroup" aria-label="Tipo cliente" style="display:flex;gap:2px;background:#F1F3F8;border-radius:10px;padding:3px;"><button id="modal-filtro-tipo-todos" type="button" style="border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">Todos</button><button id="modal-filtro-tipo-final" type="button" style="border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">Final</button><button id="modal-filtro-tipo-revenda" type="button" style="border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">Revenda</button></div></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#7C88A6;">Revisão gestor</span><div role="radiogroup" aria-label="Revisão gestor" style="display:flex;gap:2px;background:#F1F3F8;border-radius:10px;padding:3px;"><button id="modal-filtro-revisao-todos" type="button" style="border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">Todos</button><button id="modal-filtro-revisao-sim" type="button" style="border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">Sim</button><button id="modal-filtro-revisao-nao" type="button" style="border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">Não</button></div></div><button onClick="{{ fecharModal }}" style="border:none;background:#F1F5FF;border-radius:10px;width:32px;height:32px;font-size:16px;cursor:pointer;color:#5B6478;flex:none;" aria-label="Fechar">×</button></div>
 </div>
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1.4fr;gap:14px;">
 <div id="modal-kpi-valor" style="background:#F6F8FE;border-radius:14px;padding:14px 18px;"><div id="modal-kpi-valor-label" style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#7C88A6;display:flex;align-items:center;gap:5px;"><span class="material-symbols-outlined" style="font-size:15px;text-transform:none;" aria-hidden="true">paid</span>Valor</div><div id="modal-valor" style="font-size:22px;font-weight:700;color:#0E1A3A;margin-top:6px;">-</div><div id="modal-valor-split" style="display:grid;grid-template-columns:auto auto auto;justify-content:start;column-gap:12px;row-gap:3px;margin-top:8px;font-size:12px;color:#5B6478;"></div></div>
 <div id="modal-kpi-volume" style="background:#F6F8FE;border-radius:14px;padding:14px 18px;"><div id="modal-kpi-volume-label" style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#7C88A6;display:flex;align-items:center;gap:5px;"><span class="material-symbols-outlined" style="font-size:15px;text-transform:none;" aria-hidden="true">inventory_2</span>Volume</div><div id="modal-volume" style="font-size:22px;font-weight:700;color:#0E1A3A;margin-top:6px;">-</div><div id="modal-volume-split" style="display:grid;grid-template-columns:auto auto auto;justify-content:start;column-gap:12px;row-gap:3px;margin-top:8px;font-size:12px;color:#5B6478;"></div></div>
 <div id="modal-kpi-orc" style="background:#F6F8FE;border-radius:14px;padding:14px 18px;"><div id="modal-kpi-orc-label" style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#7C88A6;display:flex;align-items:center;gap:5px;"><span class="material-symbols-outlined" style="font-size:15px;text-transform:none;" aria-hidden="true">article</span>Orçamentos</div><div id="modal-qtd" style="font-size:22px;font-weight:700;color:#0E1A3A;margin-top:6px;">-</div><div id="modal-qtd-split" style="display:grid;grid-template-columns:auto auto auto;justify-content:start;column-gap:12px;row-gap:3px;margin-top:8px;font-size:12px;color:#5B6478;"></div></div>
+<div id="modal-kpi-preco" style="background:#fff;border:1.5px solid #C7CEDD;border-radius:14px;padding:13px 17px;"><div id="modal-kpi-preco-label" style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#7C88A6;display:flex;align-items:center;gap:5px;"><span class="material-symbols-outlined" style="font-size:15px;text-transform:none;" aria-hidden="true">sell</span>Preço médio</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;"><div><div style="font-size:12px;color:#5B6478;">Revenda</div><div id="modal-preco-revenda" class="tnum" style="font-size:26px;font-weight:700;color:#0E1A3A;margin-top:2px;white-space:nowrap;">-</div></div><div><div style="font-size:12px;color:#5B6478;">Final</div><div id="modal-preco-final" class="tnum" style="font-size:26px;font-weight:700;color:#0E1A3A;margin-top:2px;white-space:nowrap;">-</div></div></div><div id="modal-preco-comparacao" style="font-size:12px;color:#5B6478;margin-top:8px;">-</div></div>
 </div>
 <div style="overflow-y:auto;max-height:520px;border:1px solid #E7EBF5;border-radius:12px;">
 <table style="width:100%;border-collapse:collapse;">
@@ -1029,12 +1030,53 @@ class Component extends DCLogic {
   abrirModalItem(item, categoria){
     this._modalSort = null;
     this._modalCategoria = categoria || 'faturado';
+    this._modalFiltro = { tipo: 'todos', revisao: 'todos' };
     this.setState({ modalAberto: true, modalItem: item });
     setTimeout(() => this.preencherModal(item), 30);
   }
 
   fecharModal(){
+    this._modalFiltro = { tipo: 'todos', revisao: 'todos' };
     this.setState({ modalAberto: false, modalItem: null });
+  }
+
+  filtrarLinhasModal(linhas){
+    const filtro = this._modalFiltro || { tipo: 'todos', revisao: 'todos' };
+    const tipos = { final: 'Cliente Final', revenda: 'Revendedor' };
+    return linhas.filter((l) => {
+      if(filtro.tipo !== 'todos' && l.tipo_cliente !== tipos[filtro.tipo]) return false;
+      if(filtro.revisao === 'sim' && !l.passou_revisao_gestor) return false;
+      if(filtro.revisao === 'nao' && l.passou_revisao_gestor) return false;
+      return true;
+    });
+  }
+
+  configurarFiltrosModal(corAtiva){
+    const filtro = this._modalFiltro || { tipo: 'todos', revisao: 'todos' };
+    const grupos = { tipo: ['todos', 'final', 'revenda'], revisao: ['todos', 'sim', 'nao'] };
+    Object.entries(grupos).forEach(([chave, valores]) => {
+      valores.forEach((valor) => {
+        const btn = document.getElementById(`modal-filtro-${chave}-${valor}`);
+        if(!btn) return;
+        const ativo = filtro[chave] === valor;
+        btn.style.background = ativo ? '#fff' : 'transparent';
+        btn.style.color = ativo ? corAtiva : '#7C88A6';
+        btn.style.boxShadow = ativo ? '0 1px 3px rgba(14,26,58,0.12)' : 'none';
+        btn.setAttribute('role', 'radio');
+        btn.setAttribute('aria-checked', ativo ? 'true' : 'false');
+        btn.onclick = () => {
+          this._modalFiltro = { ...filtro, [chave]: valor };
+          if(this.state.modalItem) this.preencherModal(this.state.modalItem);
+        };
+      });
+    });
+  }
+
+  fmtBrlCompacto(v){
+    const num = v || 0;
+    if(Math.abs(num) >= 1e6) return 'R$ ' + (num / 1e6).toFixed(2).replace('.', ',') + ' MI';
+    if(Math.abs(num) >= 1e3) return 'R$ ' + Math.round(num / 1e3).toLocaleString('pt-BR') + ' Mil';
+    return 'R$ ' + Math.round(num).toLocaleString('pt-BR');
   }
 
   abrirModalOrcamento(orc){
@@ -1289,6 +1331,17 @@ class Component extends DCLogic {
       };
     };
     const partes = grupos.map(([rotulo, tipo]) => ({ rotulo, ...somar(tipo) }));
+    const precoMedio = (p) => p.volume > 0 ? p.valor / p.volume : null;
+    const [precoRevenda, precoFinal] = partes.map(precoMedio);
+    this.setText('modal-preco-revenda', precoRevenda != null ? this.fmtBrlFullCents(precoRevenda) : '-');
+    this.setText('modal-preco-final', precoFinal != null ? this.fmtBrlFullCents(precoFinal) : '-');
+    let comparacao = 'Valor dividido pelo volume de cada tipo de cliente';
+    if(precoRevenda && precoFinal){
+      const dif = ((precoFinal / precoRevenda) - 1) * 100;
+      const difFmt = Math.abs(dif).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      comparacao = Math.abs(dif) < 0.05 ? 'Final no mesmo preço da Revenda' : `Final ${difFmt}% ${dif > 0 ? 'acima' : 'abaixo'} da Revenda`;
+    }
+    this.setText('modal-preco-comparacao', comparacao);
     const total = (campo) => partes.reduce((s, p) => s + p[campo], 0);
     const pct = (v, t) => t > 0 ? `${Math.round((v / t) * 100)}%` : '-';
     const fmtInt = (v) => Math.round(v).toLocaleString('pt-BR');
@@ -1305,11 +1358,19 @@ class Component extends DCLogic {
 
   preencherModal(item){
     this.setText('modal-titulo', `${item.codigo} - ${item.descricao || ''}`);
-    this.setText('modal-qtd', String(item.orcamentos ?? '-'));
-    this.setText('modal-volume', item.volume_fmt || '-');
-    this.setText('modal-valor', item.valor || '-');
+    const linhas = this.filtrarLinhasModal(item.detalhe || []);
+    const filtro = this._modalFiltro || { tipo: 'todos', revisao: 'todos' };
+    if(filtro.tipo === 'todos' && filtro.revisao === 'todos'){
+      this.setText('modal-qtd', String(item.orcamentos ?? '-'));
+      this.setText('modal-volume', item.volume_fmt || '-');
+      this.setText('modal-valor', item.valor || '-');
+    } else {
+      this.setText('modal-qtd', new Set(linhas.map((l) => l.num_orcamento)).size.toLocaleString('pt-BR'));
+      this.setText('modal-volume', Math.round(linhas.reduce((s, l) => s + (l.volume_item || 0), 0)).toLocaleString('pt-BR'));
+      this.setText('modal-valor', this.fmtBrlCompacto(linhas.reduce((s, l) => s + (l.valor_item || 0), 0)));
+    }
 
-    this.preencherSplitTipoCliente(item.detalhe || []);
+    this.preencherSplitTipoCliente(linhas);
 
     const isFaturado = this._modalCategoria !== 'perda';
     const kpiBg = isFaturado ? '#E1F0EA' : '#F2E1E3';
@@ -1319,20 +1380,27 @@ class Component extends DCLogic {
       const el = document.getElementById(id);
       if(el) el.style.background = kpiBg;
     });
-    ['modal-kpi-valor-label', 'modal-kpi-volume-label', 'modal-kpi-orc-label'].forEach((id) => {
+    const kpiPreco = document.getElementById('modal-kpi-preco');
+    if(kpiPreco) kpiPreco.style.borderColor = kpiValueColor;
+    ['modal-kpi-valor-label', 'modal-kpi-volume-label', 'modal-kpi-orc-label', 'modal-kpi-preco-label'].forEach((id) => {
       const el = document.getElementById(id);
       if(el) el.style.color = kpiLabelColor;
     });
-    ['modal-valor', 'modal-volume', 'modal-qtd'].forEach((id) => {
+    ['modal-valor', 'modal-volume', 'modal-qtd', 'modal-preco-revenda', 'modal-preco-final'].forEach((id) => {
       const el = document.getElementById(id);
       if(el) el.style.color = kpiValueColor;
     });
 
     this.configurarOrdenacaoModal();
+    this.configurarFiltrosModal(kpiValueColor);
 
     const tbody = document.getElementById('modal-tbody');
     if(!tbody) return;
-    const linhas = item.detalhe || [];
+    if(linhas.length === 0){
+      tbody.innerHTML = `<tr><td colspan="12" style="padding:16px;text-align:center;font-size:13px;color:#9AA4BE;">Nenhum orçamento para este filtro.</td></tr>`;
+      this.marcarSetaOrdenacao(this._modalSort ? this._modalSort.thId : null, this._modalSort ? this._modalSort.dir : 1);
+      return;
+    }
     const pctColor = (pct) => pct >= 66 ? '#1F8A5B' : pct >= 33 ? '#D97706' : '#C2410C';
     const pctBg = (pct) => pct >= 66 ? '#E7F5EE' : pct >= 33 ? '#FEF3E2' : '#FCEEE2';
     tbody.innerHTML = linhas.map((l, idx) => `<tr>
