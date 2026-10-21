@@ -7,7 +7,8 @@ local "Dashboard Analise Funil/dashboard_analise_funil.dc.html".
 A versao publica e o mesmo HTML com 3 adaptacoes (ver README, secao 10):
 
 1. os 4 <script src="./data/*.js"> apontam para os links de
-   compartilhamento do SharePoint (com onerror para detectar falta de login);
+   compartilhamento do SharePoint (com onerror para detectar falta de login
+   e um parametro v=<agora> para nao usar copia antiga em cache);
 2. o dashboard comeca invisivel (visibility:{{ rootVisibility }}) e so
    aparece quando os dados carregam (gate dashboardVisible);
 3. o modal "Entre com sua conta corporativa" e o script que decide entre
@@ -74,7 +75,10 @@ def gerar_html_publico(html: str, bloco_sem_acesso: str) -> str:
             html,
             rf'^<script src="\./data/{re.escape(arquivo)}"></script>$',
             lambda _m, a=arquivo, q=query, f=flag: (
-                f'<script src="{SHAREPOINT_BASE}{a}?{q}" onerror="window.{f} = true;"></script>'
+                # document.write com &v=<agora> para o navegador nao reaproveitar
+                # uma copia antiga do arquivo em cache (os dados mudam todo dia).
+                f"<script>document.write('<script src=\"{SHAREPOINT_BASE}{a}?{q}&v=' + Date.now() + "
+                f"'\" onerror=\"window.{f} = true;\"><\\/script>');</script>"
             ),
             f"script ./data/{arquivo}",
         )
