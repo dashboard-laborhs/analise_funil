@@ -908,16 +908,29 @@ class Component extends DCLogic {
     const atual = c.atual[categoria][metrica];
     const ant = c.anterior && c.anterior[categoria] ? c.anterior[categoria][metrica] : null;
     const fmt = (v) => metrica === 'valor' ? this.fmtBrlCompacto(v) : Math.round(v).toLocaleString('pt-BR');
-    if(!ant){ chip.innerHTML = 'mês ant. <span style="color:#9AA4BE;">sem base</span>'; chip.title = 'Item sem registro nesta categoria no mês anterior, no mesmo ponto'; return; }
-    chip.innerHTML = `mês ant. ${fmt(ant)} ${this.variacaoHtml(((atual / ant) - 1) * 100, '%', 0, categoria === 'faturado')}`;
-    chip.title = `Mês anterior no mesmo ponto: ${fmt(ant)}`;
+    if(!ant){ chip.innerHTML = '<span style="color:#9AA4BE;">sem base</span>'; chip.title = 'Item sem registro nesta categoria no período anterior proporcional'; return; }
+    chip.innerHTML = `${fmt(ant)} ${this.variacaoHtml(((atual / ant) - 1) * 100, '%', 0, categoria === 'faturado')}`;
+    chip.title = `Período anterior proporcional: ${fmt(ant)}`;
   }
 
   applyTopItensData(){
     const data = window.WIN_RATE_TOP_ITENS_DATA;
     if(!data) return;
     const comp = data.comparativo;
-    this.setText('ti-comp-nota', comp ? `· Comparado com ${comp.periodo_anterior}, mesmos ${comp.dias_uteis} dias úteis` : '');
+    this.setText('ti-comp-nota', comp ? `· Período anterior proporcional: ${comp.periodo_anterior}, mesmos ${comp.dias_uteis} dias úteis do mês` : '');
+    ['ti-fat-val', 'ti-fat-vol', 'ti-fat-qtd', 'ti-env-val', 'ti-env-vol', 'ti-env-qtd'].forEach((prefixo) => {
+      const cabecalho = document.getElementById(`${prefixo}-nome-0`)?.parentElement?.previousElementSibling;
+      if(!cabecalho) return;
+      let col = document.getElementById(`${prefixo}-comp-head`);
+      if(!col){
+        col = document.createElement('span');
+        col.id = `${prefixo}-comp-head`;
+        col.style.cssText = 'margin-left:auto;margin-right:34px;width:150px;text-align:right;line-height:1.15;';
+        cabecalho.appendChild(col);
+      }
+      col.innerHTML = comp ? `<span style="display:block;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#7C88A6;">Período anterior</span><span style="display:block;font-size:10px;font-weight:400;color:#9AA4BE;">proporcional · ${comp.dias_uteis} dias úteis</span>` : '';
+      col.title = comp ? `Mesmos ${comp.dias_uteis} dias úteis do mês anterior (${comp.periodo_anterior}), para comparar períodos do mesmo tamanho` : '';
+    });
 
     const fmtPct1 = (v) => (v ?? 0).toFixed(1).replace('.', ',') + '%';
     this.setText('ti-fat-concentracao', fmtPct1(data.faturados?.concentracao_top5_valor_pct));
@@ -1391,8 +1404,8 @@ class Component extends DCLogic {
       if(filtroAtual.revisao !== 'todos' || !comp) return '';
       const ant = comp.anterior && comp.anterior[cat] ? comp.anterior[cat][`preco_${chave}`] : null;
       if(atual == null) return '';
-      if(ant == null) return 'sem base no mês anterior';
-      return `mês ant. ${this.fmtBrlFullCents(ant)} ${this.variacaoHtml(((atual / ant) - 1) * 100, '%', 1, null)}`;
+      if(ant == null) return 'sem base no período anterior';
+      return `período ant. ${this.fmtBrlFullCents(ant)} ${this.variacaoHtml(((atual / ant) - 1) * 100, '%', 1, null)}`;
     };
     const elRevAnt = document.getElementById('modal-preco-revenda-ant');
     const elFinAnt = document.getElementById('modal-preco-final-ant');
