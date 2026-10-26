@@ -91,13 +91,13 @@
           <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#9AA4BE;"><span class="material-symbols-outlined" style="font-size:15px;" aria-hidden="true">update</span><span id="page-updated">Atualizado em: -</span></span>
           <button onClick="{{ abrirModalHistorico }}" style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#2B50F0;background:#F1F5FF;border:none;border-radius:999px;padding:6px 14px;cursor:pointer;" aria-label="Ver histórico mensal"><span class="material-symbols-outlined" style="font-size:25px;" aria-hidden="true">history</span>Histórico Win Rate</button>
         </div>
-        <div style="display:flex;align-items:center;gap:14px;">
+        <div style="display:flex;align-items:center;gap:10px;">
         <sc-if value="{{ temFiltroGrupo }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;align-items:center;gap:4px;background:#fff;border:1px solid #D7DDEC;border-radius:999px;padding:4px 6px 4px 14px;box-shadow:0 2px 10px rgba(20,30,70,0.06);" title="Filtra as 3 páginas pelo grupo do vendedor. O histórico mostra sempre todos.">
-          <span style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9AA4BE;margin-right:4px;">Grupo</span>
-          <sc-if value="{{ grupoKeyAccountDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleKeyAccount }}" style="{{ grupoBtnStyle }}"><span style="{{ grupoKeyAccountBox }}">✓</span>Key Account</button></sc-if>
+        <div style="display:flex;align-items:center;gap:4px;background:#fff;border:1px solid #D7DDEC;border-radius:999px;padding:4px 6px 4px 14px;box-shadow:0 2px 10px rgba(20,30,70,0.06);" title="Filtra as 3 páginas por um grupo de vendas. Sem nenhum marcado, mostra todos. O histórico mostra sempre todos.">
+          <span style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#9AA4BE;margin-right:2px;white-space:nowrap;">Grupo Vendas</span>
           <sc-if value="{{ grupoInternoDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleInterno }}" style="{{ grupoBtnStyle }}"><span style="{{ grupoInternoBox }}">✓</span>Vendedor Interno</button></sc-if>
           <sc-if value="{{ grupoRepresentantesDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleRepresentantes }}" style="{{ grupoBtnStyle }}"><span style="{{ grupoRepresentantesBox }}">✓</span>Representantes</button></sc-if>
+          <sc-if value="{{ grupoKeyAccountDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleKeyAccount }}" style="{{ grupoBtnStyle }}"><span style="{{ grupoKeyAccountBox }}">✓</span>Key Account</button></sc-if>
         </div>
         </sc-if>
         <div style="display:flex;gap:4px;background:#fff;border:1px solid #D7DDEC;border-radius:999px;padding:4px;box-shadow:0 2px 10px rgba(20,30,70,0.06);">
@@ -682,10 +682,10 @@ class Component extends DCLogic {
     }
   }
 
-  // Filtro por grupo de vendedor. O pipeline grava, junto de cada arquivo de
-  // dados, window.<NOME>_GRUPOS = { grupos, visoes: { "key_account+interno": {...} },
-  // itens_por_orcamento }. Trocar o filtro so troca o objeto global que cada
-  // pagina ja le; com todos os grupos marcados volta a visao completa.
+  // Filtro "Grupo Vendas". O pipeline grava, junto de cada arquivo de dados,
+  // window.<NOME>_GRUPOS = { grupos, visoes: { interno: {...}, ... },
+  // itens_por_orcamento }. Um grupo por vez: marcar um troca o objeto global
+  // que cada pagina ja le; desmarcar volta a visao completa (todos).
   iniciarFiltroGrupo(){
     const nomes = ['WIN_RATE_COMPARATIVO_DATA', 'WIN_RATE_RESUMO_ATUAL_DATA', 'WIN_RATE_TOP_ITENS_DATA'];
     this._dadosCompletos = {};
@@ -696,8 +696,7 @@ class Component extends DCLogic {
     // Um grupo entra no filtro quando as 3 paginas tem a visao so dele.
     const disponiveis = ordem.filter((g) => fontes.every((f) => f.visoes[g]));
     if(disponiveis.length < 2) return;
-    this._ordemGrupos = ordem;
-    this.setState({ gruposDisponiveis: disponiveis, gruposMarcados: disponiveis });
+    this.setState({ gruposDisponiveis: disponiveis, gruposMarcados: [] });
   }
 
   devolverItens(obj, mapa){
@@ -720,15 +719,11 @@ class Component extends DCLogic {
   }
 
   alternarGrupo(grupo){
-    const atual = this.state.gruposMarcados;
-    const marcados = atual.includes(grupo) ? atual.filter((g) => g !== grupo) : [...atual, grupo];
-    if(!marcados.length) return;
-    const todos = this.state.gruposDisponiveis.every((g) => marcados.includes(g));
-    const chave = this._ordemGrupos.filter((g) => marcados.includes(g)).join('+');
+    const marcados = this.state.gruposMarcados.includes(grupo) ? [] : [grupo];
     const nomes = Object.keys(this._dadosCompletos);
     const novos = {};
     for(const nome of nomes){
-      novos[nome] = todos ? this._dadosCompletos[nome] : this.visaoGrupo(nome, chave);
+      novos[nome] = marcados.length ? this.visaoGrupo(nome, grupo) : this._dadosCompletos[nome];
       if(!novos[nome]) return;
     }
     nomes.forEach((nome) => { window[nome] = novos[nome]; });
@@ -1666,7 +1661,7 @@ class Component extends DCLogic {
   }
 
   renderVals(){
-    const tabBase = 'display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;font-family:inherit;padding:10px 18px;border-radius:999px;cursor:pointer;border:none;transition:all .15s;';
+    const tabBase = 'display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;font-family:inherit;white-space:nowrap;padding:10px 16px;border-radius:999px;cursor:pointer;border:none;transition:all .15s;';
     const active = tabBase + 'background:#2B50F0;color:#fff;';
     const idle = tabBase + 'background:transparent;color:#5B6478;';
     const screen = this.state.screen;
@@ -1720,7 +1715,7 @@ class Component extends DCLogic {
       toggleKeyAccount: () => this.alternarGrupo('key_account'),
       toggleInterno: () => this.alternarGrupo('interno'),
       toggleRepresentantes: () => this.alternarGrupo('representantes'),
-      grupoBtnStyle: 'display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;font-family:inherit;padding:7px 10px;border-radius:999px;cursor:pointer;border:none;background:transparent;color:#5B6478;',
+      grupoBtnStyle: 'display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;font-family:inherit;white-space:nowrap;padding:7px 6px;border-radius:999px;cursor:pointer;border:none;background:transparent;color:#5B6478;',
       grupoKeyAccountBox: caixa(marcados.includes('key_account')),
       grupoInternoBox: caixa(marcados.includes('interno')),
       grupoRepresentantesBox: caixa(marcados.includes('representantes')),
