@@ -697,7 +697,17 @@ class Component extends DCLogic {
     // Um grupo entra no filtro quando as 3 paginas tem a visao so dele.
     const disponiveis = ordem.filter((g) => fontes.every((f) => f.visoes[g]));
     if(disponiveis.length < 2) return;
-    this.setState({ gruposDisponiveis: disponiveis, gruposMarcados: [] });
+    // Link direto para um grupo, usado nos e-mails do grupo: ?grupo=representantes
+    const doLink = new URLSearchParams(window.location.search).get('grupo');
+    let marcados = [];
+    if(doLink && disponiveis.includes(doLink)){
+      const visoes = nomes.map((n) => this.visaoGrupo(n, doLink));
+      if(visoes.every(Boolean)){
+        nomes.forEach((n, i) => { window[n] = visoes[i]; });
+        marcados = [doLink];
+      }
+    }
+    this.setState({ gruposDisponiveis: disponiveis, gruposMarcados: marcados });
   }
 
   devolverItens(obj, mapa){
