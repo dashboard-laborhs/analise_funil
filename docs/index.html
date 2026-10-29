@@ -1807,7 +1807,7 @@ class Component extends DCLogic {
       fechamentoMenu: this.state.fechamentoMenu,
       cliqueFechamento: () => this.cliqueFechamento(),
       fechamentoTexto: mesFech ? 'Voltar ao mês atual'
-        : ({ carregando: 'Carregando…', erro: 'Fechamento indisponível' }[this.state.fechamentoStatus] || 'Fechamento'),
+        : ({ carregando: 'Carregando…', erro: 'Último fechamento indisponível' }[this.state.fechamentoStatus] || 'Último Fechamento'),
       fechamentoBtnStyle: 'display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-radius:999px;padding:6px 14px;cursor:pointer;white-space:nowrap;'
         + (mesFech || this.state.fechamentoMenu ? 'background:#2B50F0;color:#fff;' : (this.state.fechamentoStatus === 'erro' ? 'background:#F4F5F8;color:#9AA4BE;' : 'background:#F1F5FF;color:#2B50F0;')),
       fechOpStyle: 'font-size:12px;font-weight:700;font-family:inherit;border:1px solid #C9D5FF;border-radius:999px;padding:5px 12px;cursor:pointer;white-space:nowrap;background:#fff;color:#1D3AC4;',
