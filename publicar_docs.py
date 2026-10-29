@@ -58,6 +58,11 @@ FONTES_DADOS = {
     ),
 }
 
+# Fechamento dos meses: o dashboard so baixa no clique do botao "Fechamento".
+# Preencha com o link de compartilhamento do fechamento_dashboard.js no
+# SharePoint (a parte depois do "?"). Vazio = mantem o caminho ./data local.
+FECHAMENTO_QUERY = "d=w899ae8a7ae074c008fad26391dce241e&csf=1&web=1&e=Sfu7h4"
+
 
 def substituir_uma_vez(texto: str, padrao: str, novo, descricao: str) -> str:
     resultado, n = re.subn(padrao, novo, texto, flags=re.MULTILINE)
@@ -81,6 +86,17 @@ def gerar_html_publico(html: str, bloco_sem_acesso: str) -> str:
                 f"'\" onerror=\"window.{f} = true;\"><\\/script>');</script>"
             ),
             f"script ./data/{arquivo}",
+        )
+
+    if FECHAMENTO_QUERY:
+        html = substituir_uma_vez(
+            html,
+            r"^<script>window\.WIN_RATE_FECHAMENTO_SRC = '\./data/fechamento_dashboard\.js';</script>$",
+            lambda _m: (
+                f"<script>window.WIN_RATE_FECHAMENTO_SRC = '{SHAREPOINT_BASE}fechamento_dashboard.js?"
+                f"{FECHAMENTO_QUERY}&v=' + Date.now();</script>"
+            ),
+            "script do fechamento",
         )
 
     html = substituir_uma_vez(
