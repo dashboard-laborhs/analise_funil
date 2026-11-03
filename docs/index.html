@@ -755,18 +755,25 @@ class Component extends DCLogic {
 
   cliqueFechamento(){
     if(this.state.fechamentoIdx >= 0){ this.mostrarFechamento(-1); return; }
-    if(this.state.fechamentoStatus === 'ok'){ this.setState({ fechamentoMenu: !this.state.fechamentoMenu }); return; }
+    if(this.state.fechamentoStatus === 'ok'){ this.abrirFechamento(!this.state.fechamentoMenu); return; }
     if(this.state.fechamentoStatus === 'carregando') return;
-    if(window.WIN_RATE_FECHAMENTO_DATA){ this.setState({ fechamentoStatus: 'ok', fechamentoMenu: true }); return; }
+    if(window.WIN_RATE_FECHAMENTO_DATA){ this.setState({ fechamentoStatus: 'ok' }); this.abrirFechamento(true); return; }
     this.setState({ fechamentoStatus: 'carregando' });
     const script = document.createElement('script');
     script.src = window.WIN_RATE_FECHAMENTO_SRC || './data/fechamento_dashboard.js';
     script.onload = () => {
       const ok = this.mesesFechamento().length > 0;
-      this.setState({ fechamentoStatus: ok ? 'ok' : 'erro', fechamentoMenu: ok });
+      this.setState({ fechamentoStatus: ok ? 'ok' : 'erro' });
+      if(ok) this.abrirFechamento(true);
     };
     script.onerror = () => this.setState({ fechamentoStatus: 'erro' });
     document.head.appendChild(script);
+  }
+
+  // Com um mes so, abre direto a foto dele; com mais de um, mostra o menu.
+  abrirFechamento(abrir){
+    if(abrir && this.mesesFechamento().length === 1){ this.mostrarFechamento(0); return; }
+    this.setState({ fechamentoMenu: abrir });
   }
 
   mostrarFechamento(idx){
