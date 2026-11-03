@@ -128,11 +128,11 @@
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
         <sc-if value="{{ temFiltroGrupo }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;align-items:center;gap:2px;background:transparent;border:1px dashed #D7DDEC;border-radius:999px;padding:2px 6px 2px 12px;">
-          <span style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#9AA4BE;margin-right:2px;white-space:nowrap;">Grupo Vendas</span>
-          <sc-if value="{{ grupoInternoDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleInterno }}" style="{{ grupoBtnStyle }}"><span style="{{ grupoInternoBox }}">✓</span>Vendedor Interno</button></sc-if>
-          <sc-if value="{{ grupoRepresentantesDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleRepresentantes }}" style="{{ grupoBtnStyle }}"><span style="{{ grupoRepresentantesBox }}">✓</span>Representantes</button></sc-if>
-          <sc-if value="{{ grupoKeyAccountDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleKeyAccount }}" style="{{ grupoBtnStyle }}"><span style="{{ grupoKeyAccountBox }}">✓</span>Key Account</button></sc-if>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#9AA4BE;margin-right:2px;white-space:nowrap;">Filtro Grupo de Vendas</span>
+          <sc-if value="{{ grupoInternoDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleInterno }}" style="{{ grupoInternoBtn }}">Vendedor Interno</button></sc-if>
+          <sc-if value="{{ grupoRepresentantesDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleRepresentantes }}" style="{{ grupoRepresentantesBtn }}">Representantes</button></sc-if>
+          <sc-if value="{{ grupoKeyAccountDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleKeyAccount }}" style="{{ grupoKeyAccountBtn }}">Key Account</button></sc-if>
         </div>
         </sc-if>
         <div style="display:flex;gap:4px;background:#fff;border:1px solid #D7DDEC;border-radius:999px;padding:4px;box-shadow:0 2px 10px rgba(20,30,70,0.06);">
@@ -2015,6 +2015,8 @@ class Component extends DCLogic {
     const marcados = this.state.gruposMarcados;
     const caixa = (ok) => 'display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:3px;font-size:9px;font-weight:700;line-height:1;'
       + (ok ? 'background:#2B50F0;border:1.5px solid #2B50F0;color:#fff;' : 'background:#fff;border:1.5px solid #B0B9CF;color:transparent;');
+    const chipGrupo = (ok) => 'font-size:12px;font-weight:600;font-family:inherit;white-space:nowrap;padding:4px 11px;border-radius:999px;cursor:pointer;'
+      + (ok ? 'background:#E4ECFF;border:1px solid #B9CFFF;color:#1E3FC4;' : 'background:transparent;border:1px solid #D7DDEC;color:#7C88A6;');
     const mesesFech = this.state.fechamentoStatus === 'ok' ? this.mesesFechamento() : [];
     const mesFech = this.state.fechamentoIdx >= 0 ? mesesFech[this.state.fechamentoIdx] : null;
     return {
@@ -2066,6 +2068,9 @@ class Component extends DCLogic {
       toggleRepresentantes: () => this.alternarGrupo('representantes'),
       grupoBtnStyle: 'display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;font-family:inherit;white-space:nowrap;padding:5px 6px;border-radius:999px;cursor:pointer;border:none;background:transparent;color:#7C88A6;',
       grupoKeyAccountBox: caixa(marcados.includes('key_account')),
+      grupoInternoBtn: chipGrupo(marcados.includes('interno')),
+      grupoRepresentantesBtn: chipGrupo(marcados.includes('representantes')),
+      grupoKeyAccountBtn: chipGrupo(marcados.includes('key_account')),
       grupoInternoBox: caixa(marcados.includes('interno')),
       grupoRepresentantesBox: caixa(marcados.includes('representantes')),
       fechamentoAtivo: !!mesFech,
