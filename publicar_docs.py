@@ -63,6 +63,11 @@ FONTES_DADOS = {
 # SharePoint (a parte depois do "?"). Vazio = mantem o caminho ./data local.
 FECHAMENTO_QUERY = "d=w899ae8a7ae074c008fad26391dce241e&csf=1&web=1&e=Sfu7h4"
 
+# Segmentacao de clientes (tags DIAMOND/PLATINUM/GOLD/STANDARD): o dashboard
+# baixa depois de abrir. Link do labor-segmentacao.js no SharePoint (a parte
+# depois do "?"). Vazio = mantem o caminho ./data local.
+SEGMENTACAO_QUERY = "d=w9d8be78d14e54098a4e0b1f0afab4b01&csf=1&web=1&e=veDwC5"
+
 
 def substituir_uma_vez(texto: str, padrao: str, novo, descricao: str) -> str:
     resultado, n = re.subn(padrao, novo, texto, flags=re.MULTILINE)
@@ -97,6 +102,17 @@ def gerar_html_publico(html: str, bloco_sem_acesso: str) -> str:
                 f"{FECHAMENTO_QUERY}&v=' + Date.now();</script>"
             ),
             "script do fechamento",
+        )
+
+    if SEGMENTACAO_QUERY:
+        html = substituir_uma_vez(
+            html,
+            r"^<script>window\.LABOR_SEGMENTACAO_SRC = '\./data/labor-segmentacao\.js';</script>$",
+            lambda _m: (
+                f"<script>window.LABOR_SEGMENTACAO_SRC = '{SHAREPOINT_BASE}labor-segmentacao.js?"
+                f"{SEGMENTACAO_QUERY}&v=' + Date.now();</script>"
+            ),
+            "script da segmentacao",
         )
 
     html = substituir_uma_vez(

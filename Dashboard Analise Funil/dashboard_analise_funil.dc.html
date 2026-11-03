@@ -11,6 +11,7 @@
 <script src="./data/top_itens_dashboard.js"></script>
 <script src="./data/historico_dashboard.js"></script>
 <script>window.WIN_RATE_FECHAMENTO_SRC = './data/fechamento_dashboard.js';</script>
+<script>window.LABOR_SEGMENTACAO_SRC = './data/labor-segmentacao.js';</script>
 </head>
 <body>
 <x-dc>
@@ -22,6 +23,13 @@
   *{margin:0;padding:0;box-sizing:border-box;}
   html,body{width:100%;height:100%;background:#E4E8F3;overflow:hidden;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
   .tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
+  .seg-ini{min-width:16px;height:16px;padding:0 3px;box-sizing:border-box;border-radius:6px;border:1px solid transparent;display:inline-flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:900;line-height:1;vertical-align:1px;margin-right:6px;flex:none;cursor:default;}
+  .seg-nome{display:inline-block;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.03em;vertical-align:2px;margin-right:8px;cursor:default;}
+  .seg-DIAMOND{background:#E8EDFF;color:#0B33DD;}
+  .seg-PLATINUM{background:#E4E9F5;color:#001E51;}
+  .seg-GOLD{background:#FDEDD1;color:#B97307;}
+  .seg-STANDARD{background:#EDEAE5;color:#624747;}
+  .seg-SEM{background:#F0F0F1;color:#8E95A7;}
   @keyframes softEnter{
     from{opacity:0;transform:translateY(12px);}
     to{opacity:1;transform:translateY(0);}
@@ -119,7 +127,7 @@
 
     <!-- ===== BODY: CONVERSÃO ===== -->
     <sc-if value="{{ isConversao }}" hint-placeholder-val="{{ true }}">
-    <div style="position:absolute;top:200px;left:80px;right:80px;bottom:120px;display:grid;grid-template-columns:1fr 600px;gap:36px;animation:softEnter .34s ease;">
+    <div style="position:absolute;top:200px;left:80px;right:80px;bottom:120px;display:grid;grid-template-columns:1fr 320px;gap:28px;animation:softEnter .34s ease;">
 
       <!-- ===================== LEFT: CRIAÇÃO ===================== -->
       <div style="background:#fff;border:1px solid #E7EBF5;border-radius:28px;padding:34px 40px;box-shadow:0 24px 60px rgba(24,38,90,0.08);display:flex;flex-direction:column;">
@@ -314,109 +322,35 @@
         </div>
       </div>
 
-      <!-- ===================== RIGHT: FATURAMENTO ===================== -->
-      <div style="background:linear-gradient(165deg,#2747C9 0%, #1E337F 100%);border-radius:28px;padding:44px 44px;box-shadow:0 24px 60px rgba(24,38,90,0.20);display:flex;flex-direction:column;color:#fff;position:relative;">
-        <div style="position:absolute;inset:0;border-radius:28px;overflow:hidden;pointer-events:none;">
-          <div style="position:absolute;top:-120px;right:-120px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 70%);"></div>
+      <!-- ===================== RIGHT: FORA DO WIN RATE ===================== -->
+      <div style="background:rgba(255,255,255,0.45);backdrop-filter:blur(6px);border:1px solid rgba(214,222,240,0.7);border-radius:28px;padding:28px 26px;display:flex;flex-direction:column;position:relative;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="width:10px;height:10px;border-radius:3px;background:#8FA3E8;"></div>
+          <span style="font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#7C88A6;">Fora do Win Rate</span>
         </div>
-
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;position:relative;">
-          <div style="width:12px;height:12px;border-radius:3px;background:#9DB4FF;"></div>
-          <span style="font-size:13px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#AFC0FF;">Win Rate</span>
-        </div>
-        <span style="display:flex;align-items:center;gap:8px;font-size:22px;font-weight:700;margin-bottom:6px;position:relative;">Data de Faturamento do Orçamento<span class="info-tip">
-            <span class="material-symbols-outlined info-tip-icon" style="font-size:19px;color:#AFC0FF;" aria-label="Informação sobre Data de Faturamento do Orçamento">info</span>
+        <span style="display:flex;align-items:flex-start;gap:6px;font-size:17px;font-weight:700;color:#0E1A3A;margin-bottom:6px;line-height:1.3;">Orçamentos faturados que foram criados em meses anteriores<span class="info-tip" style="flex:none;">
+            <span class="material-symbols-outlined info-tip-icon" style="font-size:17px;color:#9AA4BE;margin-top:2px;" aria-label="Informação sobre orçamentos faturados de meses anteriores">info</span>
             <span class="info-tip-box" style="right:0;">
-              <span class="info-tip-title"><span class="info-tip-dot" style="background:#9DB4FF;"></span>Como funciona</span>
+              <span class="info-tip-title"><span class="info-tip-dot" style="background:#8FA3E8;"></span>Como funciona</span>
               <ul>
-                <li><b>Filtra pela data de faturamento</b> — ou pela data de criação, se o orçamento ainda não faturou.</li>
-                <li>Recotações da mesma negociação (mesmo cliente e itens, até 15 dias de diferença) não duplicam, conta só a versão mais recente, a menos que uma delas já tenha faturado.</li>
-                <li>Um orçamento entra ou sai da contagem conforme a data de faturamento, não a de criação — por isso os totais podem diferir da visão ao lado.</li>
-                <li><b>Comparação justa com o período anterior:</b> no período anterior, o que faturou depois da data equivalente volta a contar como pendente, pela data de criação. É o mesmo tratamento dos pendentes do período atual.</li>
+                <li><b>Faturados no período atual, criados antes dele.</b> Entram no faturamento do mês, mas não no win rate dele.</li>
+                <li>O win rate conta cada orçamento no mês em que foi criado. Esses orçamentos ficaram como não faturados no win rate do mês de origem.</li>
+                <li><b>% do faturado do mês:</b> quanto eles representam de tudo o que faturou no período.</li>
+                <li>A base traz os orçamentos criados nos últimos 3 meses, então a origem fica limitada a eles.</li>
               </ul>
             </span>
           </span></span>
-        <span style="font-size:14px;color:#B9C6F2;margin-bottom:24px;position:relative;">Período atual vs. anterior · base na data de faturamento</span>
-
-        <div style="display:flex;flex-direction:column;gap:16px;position:relative;">
-          <div class="hover-scale" style="display:flex;align-items:center;gap:24px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:20px 26px;">
-            <div style="position:relative;width:118px;height:118px;flex:none;">
-              <div id="fat-cur-wr-val-ring" class="winring" data-pct="54.73" data-fill="#9DB4FF" data-track="rgba(255,255,255,0.16)" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#9DB4FF 0%, rgba(255,255,255,0.16) 0%);"></div>
-              <div style="position:absolute;inset:12px;border-radius:50%;background:#243C97;display:flex;align-items:center;justify-content:center;">
-                <span id="fat-cur-wr-val" class="winnum tnum" data-count="54.73" data-format="pct" style="font-size:22px;font-weight:700;color:#fff;">0%</span>
-              </div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px;">
-              <span style="display:flex;align-items:center;gap:12px;">
-                <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.14);">
-                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="9"></circle>
-                    <path d="M15.5 8.5h-5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4h-5"></path>
-                    <path d="M12 6.5v11"></path>
-                  </svg>
-                </span>
-                <span style="font-size:18px;font-weight:700;">Valor</span>
-              </span>
-              <span style="font-size:13px;color:#B9C6F2;">Win rate por R$</span>
-              <span style="display:inline-flex;align-items:center;gap:8px;margin-top:2px;"><span id="fat-prev-wr-val" style="font-size:13px;color:#C7D3F5;font-weight:700;">Ant. 65,37%</span><span id="fat-cur-wr-val-delta" style="display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:700;color:#FFC9B3;background:rgba(0,0,0,0.18);padding:2px 8px;border-radius:999px;">▼ 10,64 p.p.</span></span>
-            </div>
-          </div>
-
-          <div class="hover-scale" style="display:flex;align-items:center;gap:24px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:20px 26px;">
-            <div style="position:relative;width:118px;height:118px;flex:none;">
-              <div id="fat-cur-wr-qtd-ring" class="winring" data-pct="66.65" data-fill="#FFFFFF" data-track="rgba(255,255,255,0.16)" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#FFFFFF 0%, rgba(255,255,255,0.16) 0%);"></div>
-              <div style="position:absolute;inset:12px;border-radius:50%;background:#243C97;display:flex;align-items:center;justify-content:center;">
-                <span id="fat-cur-wr-qtd" class="winnum tnum" data-count="66.65" data-format="pct" style="font-size:22px;font-weight:700;color:#fff;">0%</span>
-              </div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px;">
-              <span style="display:flex;align-items:center;gap:12px;">
-                <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.14);">
-                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path>
-                    <path d="M14 2v5a1 1 0 0 0 1 1h5"></path>
-                    <path d="M10 9H8"></path>
-                    <path d="M16 13H8"></path>
-                    <path d="M16 17H8"></path>
-                  </svg>
-                </span>
-                <span style="font-size:18px;font-weight:700;">Quantidade</span>
-              </span>
-              <span style="font-size:13px;color:#B9C6F2;">Win rate por quantidade</span>
-              <span style="display:inline-flex;align-items:center;gap:8px;margin-top:2px;"><span id="fat-prev-wr-qtd" style="font-size:13px;color:#C7D3F5;font-weight:700;">Ant. 71,01%</span><span id="fat-cur-wr-qtd-delta" style="display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:700;color:#FFC9B3;background:rgba(0,0,0,0.18);padding:2px 8px;border-radius:999px;">▼ 4,36 p.p.</span></span>
-            </div>
-          </div>
+        <span style="font-size:12.5px;color:#7C88A6;margin-bottom:16px;line-height:1.45;">Entram no faturamento do mês, mas não no win rate dele.</span>
+        <div style="display:flex;flex-direction:column;border-bottom:1px solid rgba(214,222,240,0.8);">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:10px 2px;border-top:1px solid rgba(214,222,240,0.8);"><span style="font-size:13px;color:#5B6488;">Valor faturado</span><span id="fwr-valor" class="tnum" style="font-size:18px;font-weight:700;color:#0E1A3A;">-</span></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:10px 2px;border-top:1px solid rgba(214,222,240,0.8);"><span style="font-size:13px;color:#5B6488;">Orçamentos</span><span id="fwr-qtd" class="tnum" style="font-size:18px;font-weight:700;color:#0E1A3A;">-</span></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:10px 2px;border-top:1px solid rgba(214,222,240,0.8);"><span style="font-size:13px;color:#5B6488;">Do faturado do mês</span><span id="fwr-pct" class="tnum" style="font-size:18px;font-weight:700;color:#0E1A3A;">-</span></div>
         </div>
-
-        <sc-if value="{{ showUplift }}" hint-placeholder-val="{{ true }}">
-          <div style="margin-top:auto;position:relative;padding-top:22px;display:flex;flex-direction:column;">
-            <div style="display:grid;grid-template-columns:1fr 190px 168px;gap:18px;align-items:baseline;padding:0 4px 8px;">
-              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9DAEE0;">Atual vs. anterior</span>
-              <span style="font-size:11px;font-weight:700;color:#C7D3F5;text-align:right;">Atual</span>
-              <span style="font-size:11px;font-weight:700;color:#9DAEE0;text-align:right;">Anterior</span>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 190px 168px;gap:18px;align-items:center;padding:8px 4px;border-top:1px solid rgba(255,255,255,0.10);">
-              <span style="font-size:14px;color:#D8E0F7;">Valor enviado</span>
-              <span style="display:flex;align-items:center;justify-content:flex-end;gap:8px;"><span id="fat-cur-valor-enviado" class="tnum" style="font-size:16px;font-weight:700;color:#fff;">R$ 19.316.250</span><span id="fat-delta-valor-enviado" style="font-size:11px;font-weight:700;color:#B6F0CF;background:rgba(0,0,0,0.18);padding:2px 7px;border-radius:999px;">▲ 2,4%</span></span>
-              <span id="fat-prev-valor-enviado" class="tnum" style="font-size:13px;color:#9DAEE0;text-align:right;">R$ 18.867.892</span>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 190px 168px;gap:18px;align-items:center;padding:8px 4px;border-top:1px solid rgba(255,255,255,0.10);">
-              <span style="font-size:14px;color:#D8E0F7;">Valor faturado</span>
-              <span style="display:flex;align-items:center;justify-content:flex-end;gap:8px;"><span id="fat-cur-valor-faturado" class="tnum" style="font-size:16px;font-weight:700;color:#fff;">R$ 10.572.679</span><span id="fat-delta-valor-faturado" style="font-size:11px;font-weight:700;color:#FFC9B3;background:rgba(0,0,0,0.18);padding:2px 7px;border-radius:999px;">▼ 14,3%</span></span>
-              <span id="fat-prev-valor-faturado" class="tnum" style="font-size:13px;color:#9DAEE0;text-align:right;">R$ 12.333.505</span>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 190px 168px;gap:18px;align-items:center;padding:8px 4px;border-top:1px solid rgba(255,255,255,0.10);">
-              <span style="font-size:14px;color:#D8E0F7;">Orç. enviados</span>
-              <span style="display:flex;align-items:center;justify-content:flex-end;gap:8px;"><span id="fat-cur-qtd-enviados" class="tnum" style="font-size:16px;font-weight:700;color:#fff;">2.417</span><span id="fat-delta-qtd-enviados" style="font-size:11px;font-weight:700;color:#FFC9B3;background:rgba(0,0,0,0.18);padding:2px 7px;border-radius:999px;">▼ 1,6%</span></span>
-              <span id="fat-prev-qtd-enviados" class="tnum" style="font-size:13px;color:#9DAEE0;text-align:right;">2.456</span>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 190px 168px;gap:18px;align-items:center;padding:8px 4px;border-top:1px solid rgba(255,255,255,0.10);border-bottom:1px solid rgba(255,255,255,0.10);">
-              <span style="font-size:14px;color:#D8E0F7;">Orç. faturados</span>
-              <span style="display:flex;align-items:center;justify-content:flex-end;gap:8px;"><span id="fat-cur-qtd-faturados" class="tnum" style="font-size:16px;font-weight:700;color:#fff;">1.611</span><span id="fat-delta-qtd-faturados" style="font-size:11px;font-weight:700;color:#FFC9B3;background:rgba(0,0,0,0.18);padding:2px 7px;border-radius:999px;">▼ 7,6%</span></span>
-              <span id="fat-prev-qtd-faturados" class="tnum" style="font-size:13px;color:#9DAEE0;text-align:right;">1.744</span>
-            </div>
-          </div>
-        </sc-if>
+        <div style="margin-top:18px;display:flex;flex-direction:column;">
+          <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8A95B0;padding:0 2px 4px;">Origem · mês de criação</span>
+          <div id="fwr-origens" style="display:flex;flex-direction:column;"></div>
+        </div>
+        <button id="fwr-ver-btn" onClick="{{ abrirModalFora }}" style="margin-top:auto;align-self:flex-start;font-size:13px;font-weight:700;font-family:inherit;color:#2B50F0;background:rgba(255,255,255,0.6);border:1px solid #D9E2F7;border-radius:999px;padding:8px 16px;cursor:pointer;">Ver orçamentos</button>
       </div>
     </div>
     </sc-if>
@@ -619,6 +553,33 @@
 </div>
 </sc-if>
 
+<sc-if value="{{ modalForaAberto }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ fecharModalFora }}" style="position:fixed;inset:0;background:rgba(14,26,58,0.45);display:flex;align-items:center;justify-content:center;z-index:55;animation:modalOverlayIn .18s ease;">
+<div style="transform:scale({{ scale }});transform-origin:center center;">
+<div onClick="{{ pararPropagacao }}" style="background:#fff;border-radius:20px;width:1300px;max-height:800px;padding:32px;box-shadow:0 24px 60px rgba(24,38,90,0.25);display:flex;flex-direction:column;gap:16px;animation:modalDialogIn .22s cubic-bezier(0.16,1,0.3,1);">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
+<div style="display:flex;flex-direction:column;gap:3px;">
+<span id="modal-fwr-rotulo" style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#7C88A6;">Fora do Win Rate</span>
+<span style="font-size:20px;font-weight:700;color:#0E1A3A;">Orçamentos faturados que foram criados em meses anteriores</span>
+<span id="modal-fwr-subtitulo" style="font-size:13px;color:#7C88A6;">-</span>
+</div>
+<div style="display:flex;align-items:center;gap:10px;flex:none;">
+<button id="modal-fwr-download-btn" style="border:none;background:#F1F5FF;border-radius:10px;height:32px;padding:0 14px;font-size:13px;font-weight:700;cursor:pointer;color:#2B50F0;display:flex;align-items:center;gap:6px;" aria-label="Baixar lista de orçamentos"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">download</span>Baixar</button>
+<button onClick="{{ fecharModalFora }}" style="border:none;background:#F1F5FF;border-radius:10px;width:32px;height:32px;font-size:16px;cursor:pointer;color:#5B6478;flex:none;" aria-label="Fechar">×</button>
+</div>
+</div>
+<div id="modal-fwr-filtros" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"></div>
+<div style="overflow-y:auto;max-height:600px;border:1px solid #E7EBF5;border-radius:12px;">
+<table style="width:100%;border-collapse:collapse;">
+<thead><tr style="background:#F6F8FE;position:sticky;top:0;"><th id="th-fwr-orc" style="padding:10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:#9AA4BE;white-space:nowrap;cursor:pointer;user-select:none;">Orçamento <span id="th-fwr-orc-seta" style="opacity:0.35;">↕</span></th><th id="th-fwr-cliente" style="padding:10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:#9AA4BE;white-space:nowrap;cursor:pointer;user-select:none;">Cliente <span id="th-fwr-cliente-seta" style="opacity:0.35;">↕</span></th><th id="th-fwr-vendedor" style="padding:10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:#9AA4BE;white-space:nowrap;cursor:pointer;user-select:none;">Vendedor <span id="th-fwr-vendedor-seta" style="opacity:0.35;">↕</span></th><th id="th-fwr-criado" style="padding:10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:#9AA4BE;white-space:nowrap;cursor:pointer;user-select:none;">Criado em <span id="th-fwr-criado-seta" style="opacity:0.35;">↕</span></th><th id="th-fwr-faturado" style="padding:10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:#9AA4BE;white-space:nowrap;cursor:pointer;user-select:none;">Faturado em <span id="th-fwr-faturado-seta" style="opacity:0.35;">↕</span></th><th id="th-fwr-dias" style="padding:10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:#9AA4BE;white-space:nowrap;cursor:pointer;user-select:none;text-align:right;">Dias até faturar <span id="th-fwr-dias-seta" style="opacity:0.35;">↕</span></th><th id="th-fwr-valor" style="padding:10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:#9AA4BE;white-space:nowrap;cursor:pointer;user-select:none;text-align:right;">Valor faturado <span id="th-fwr-valor-seta" style="opacity:0.35;">↕</span></th></tr></thead>
+<tbody id="modal-fwr-tbody"></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{ modalHistoricoAberto }}" hint-placeholder-val="{{ false }}">
 <div onClick="{{ fecharModalHistorico }}" style="position:fixed;inset:0;background:rgba(14,26,58,0.45);display:flex;align-items:center;justify-content:center;z-index:65;animation:modalOverlayIn .18s ease;">
 <div style="transform:scale({{ scale }});transform-origin:center center;">
@@ -660,7 +621,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;showUplift&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
 class Component extends DCLogic {
-  state = { scale: 1, screen: 'conversao', modalAberto: false, modalItem: null, modalOrcamentoAberto: false, modalOrcamento: null, modalStatusAberto: false, modalStatus: null, modalHistoricoAberto: false, gruposMarcados: [], gruposDisponiveis: [], fechamentoIdx: -1, fechamentoMenu: false, fechamentoStatus: 'idle' };
+  state = { scale: 1, screen: 'conversao', modalAberto: false, modalItem: null, modalOrcamentoAberto: false, modalOrcamento: null, modalStatusAberto: false, modalStatus: null, modalForaAberto: false, modalHistoricoAberto: false, gruposMarcados: [], gruposDisponiveis: [], fechamentoIdx: -1, fechamentoMenu: false, fechamentoStatus: 'idle' };
 
   constructor(props){
     super(props);
@@ -678,6 +639,7 @@ class Component extends DCLogic {
     this.applyComparativoData();
     this.applyTopItensData();
     this.applyHistoricoData();
+    this.carregarSegmentacao();
     setTimeout(() => this.animate(), 250);
     // Link direto para uma aba: #ranking ou #resumo
     const aba = (window.location.hash || '').replace('#', '').toLowerCase();
@@ -858,6 +820,64 @@ class Component extends DCLogic {
     return 'R$ ' + (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  // Segmentacao de clientes (DIAMOND, PLATINUM, GOLD, STANDARD), por CNPJ.
+  // O arquivo vem do painel de Segmentacao e carrega depois do painel abrir;
+  // quando chega, redesenha o que mostra cliente. Sem o arquivo, nada muda.
+  carregarSegmentacao(){
+    const montar = () => {
+      const rows = window.LABOR_SEGMENTACAO_ROWS;
+      if(!Array.isArray(rows)) return;
+      const mapa = {};
+      rows.forEach((r) => {
+        const cnpj = String(r['d_Cliente[CNPJ Cliente]'] || '').replace(/\D/g, '');
+        const seg = String(r.Segmentacao || '').trim().toUpperCase();
+        if(cnpj && seg) mapa[cnpj.padStart(14, '0')] = seg;
+      });
+      this._segPorCnpj = mapa;
+      this.applyResumoAtualData();
+      if(this.state.modalStatusAberto && this.state.modalStatus) this.preencherModalStatus(this.state.modalStatus);
+      if(this.state.modalAberto && this.state.modalItem) this.preencherModal(this.state.modalItem);
+      if(this.state.modalOrcamentoAberto && this.state.modalOrcamento) this.preencherModalOrcamento(this.state.modalOrcamento);
+      if(this.state.modalForaAberto) this.preencherModalFora();
+    };
+    if(Array.isArray(window.LABOR_SEGMENTACAO_ROWS)){ montar(); return; }
+    const script = document.createElement('script');
+    script.src = window.LABOR_SEGMENTACAO_SRC || './data/labor-segmentacao.js';
+    script.onload = montar;
+    document.head.appendChild(script);
+  }
+
+  // Segmento do cliente. Revenda fora do arquivo = STANDARD; cliente final
+  // (fora da segmentacao) = 'SEM SEGMENTO' (tag cinza "-"). Sem arquivo = null.
+  segmentoCliente(cnpj, tipoCliente){
+    if(!this._segPorCnpj) return null;
+    const doc = String(cnpj || '').replace(/\D/g, '');
+    const seg = doc ? this._segPorCnpj[doc.padStart(14, '0')] : null;
+    if(seg) return seg;
+    return /revend/i.test(String(tipoCliente || '')) ? 'STANDARD' : 'SEM SEGMENTO';
+  }
+
+  tagSegmento(cnpj, tipoCliente, nomeCompleto){
+    const seg = this.segmentoCliente(cnpj, tipoCliente);
+    if(!seg) return '';
+    const sem = seg === 'SEM SEGMENTO';
+    const classe = 'seg-' + (sem ? 'SEM' : seg);
+    const titulo = sem ? 'Sem segmento (cliente final)' : `Segmento ${seg}`;
+    if(nomeCompleto) return `<span class="seg-nome ${classe}" title="${this.escapeHtml(titulo)}">${this.escapeHtml(seg)}</span>`;
+    return `<span class="seg-ini ${classe}" title="${this.escapeHtml(titulo)}">${sem ? '-' : this.escapeHtml(seg.charAt(0))}</span>`;
+  }
+
+  clienteComTag(cliente, cnpj, tipoCliente){
+    const nome = this.escapeHtml(cliente);
+    if(!nome) return '-';
+    const tag = this.tagSegmento(cnpj, tipoCliente);
+    return tag ? `<span style="white-space:nowrap;">${tag}${nome}</span>` : nome;
+  }
+
+  textoSegmento(cnpj, tipoCliente){
+    return this.segmentoCliente(cnpj, tipoCliente) || '';
+  }
+
   setText(id, value){
     const el = document.getElementById(id);
     if(el && value !== undefined && value !== null) el.textContent = String(value);
@@ -932,25 +952,163 @@ class Component extends DCLogic {
     this.setText('cr-cur-qtd-faturados', br.qtd_faturados_fmt);
     this.setDeltaChip('cr-cur-qtd-faturados-delta', m.quantidade_faturada?.variacao_percentual, this.fmtDeltaPct, true);
 
-    this.setRing('fat-cur-wr-val-ring', 'fat-cur-wr-val', br.win_rate_valor_data_faturamento_numero);
-    this.setText('fat-prev-wr-val', `Ant. ${ar.win_rate_valor_data_faturamento || '-'}`);
-    this.setDeltaChip('fat-cur-wr-val-delta', m.win_rate_valor_data_faturamento?.variacao_absoluta, this.fmtPp, true, true);
-    this.setRing('fat-cur-wr-qtd-ring', 'fat-cur-wr-qtd', br.win_rate_qtd_data_faturamento_numero);
-    this.setText('fat-prev-wr-qtd', `Ant. ${ar.win_rate_qtd_data_faturamento || '-'}`);
-    this.setDeltaChip('fat-cur-wr-qtd-delta', m.win_rate_quantidade_data_faturamento?.variacao_absoluta, this.fmtPp, true, true);
+    this.applyForaWinRate(br.fora_win_rate);
+  }
 
-    this.setText('fat-cur-valor-enviado', this.fmtBrlFull(br.valor_enviado_numero_data_faturamento));
-    this.setText('fat-prev-valor-enviado', this.fmtBrlFull(ar.valor_enviado_numero_data_faturamento));
-    this.setDeltaChip('fat-delta-valor-enviado', m.valor_enviado_data_faturamento?.variacao_percentual, this.fmtDeltaPct, true, true);
-    this.setText('fat-cur-valor-faturado', this.fmtBrlFull(br.valor_faturado_numero_data_faturamento));
-    this.setText('fat-prev-valor-faturado', this.fmtBrlFull(ar.valor_faturado_numero_data_faturamento));
-    this.setDeltaChip('fat-delta-valor-faturado', m.valor_faturado_data_faturamento?.variacao_percentual, this.fmtDeltaPct, true, true);
-    this.setText('fat-cur-qtd-enviados', br.qtd_enviados_data_faturamento_fmt);
-    this.setText('fat-prev-qtd-enviados', ar.qtd_enviados_data_faturamento_fmt);
-    this.setDeltaChip('fat-delta-qtd-enviados', m.quantidade_enviada_data_faturamento?.variacao_percentual, this.fmtDeltaPct, true, true);
-    this.setText('fat-cur-qtd-faturados', br.qtd_faturados_data_faturamento_fmt);
-    this.setText('fat-prev-qtd-faturados', ar.qtd_faturados_data_faturamento_fmt);
-    this.setDeltaChip('fat-delta-qtd-faturados', m.quantidade_faturada_data_faturamento?.variacao_percentual, this.fmtDeltaPct, true, true);
+  // Quadro "Fora do Win Rate": faturados no periodo que foram criados antes dele.
+  // Vem no resumo do periodo atual do comparativo (fora_win_rate). Fotos de
+  // fechamento anteriores a este quadro nao trazem o campo: mostra "-".
+  applyForaWinRate(info){
+    this._foraWinRate = info || null;
+    const temDados = !!info;
+    this.setText('fwr-valor', temDados ? this.fmtBrlMi(info.valor_numero) : '-');
+    this.setText('fwr-qtd', temDados ? info.qtd_fmt : '-');
+    this.setText('fwr-pct', temDados ? this.fmtPct1(info.pct_faturado_mes_numero) : '-');
+
+    const box = document.getElementById('fwr-origens');
+    if(box){
+      const origens = temDados ? (info.origens || []) : [];
+      const maior = Math.max(0, ...origens.map((o) => o.valor_numero || 0));
+      box.innerHTML = origens.length === 0
+        ? `<span style="font-size:12.5px;color:#9AA4BE;padding:8px 2px;">${temDados ? 'Nenhum orçamento neste período.' : 'Sem dados para este período.'}</span>`
+        : origens.map((o) => {
+          const largura = maior > 0 ? Math.max(2, (o.valor_numero / maior) * 100) : 0;
+          return `<div style="display:flex;flex-direction:column;gap:6px;padding:8px 2px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <span style="font-size:13px;font-weight:700;color:#0E1A3A;">${this.escapeHtml(o.mes)}</span>
+              <span class="tnum" style="font-size:13px;color:#35519E;">${this.fmtBrlMi(o.valor_numero)} <span style="font-size:12px;color:#8A95B0;">· ${this.escapeHtml(o.qtd_fmt)}</span></span>
+            </div>
+            <div style="height:6px;border-radius:999px;background:rgba(214,222,240,0.6);overflow:hidden;"><div style="height:100%;width:${largura}%;border-radius:999px;background:#8FA3E8;"></div></div>
+          </div>`;
+        }).join('');
+    }
+
+    const btn = document.getElementById('fwr-ver-btn');
+    if(btn){
+      const vazio = !temDados || !(info.orcamentos || []).length;
+      btn.disabled = vazio;
+      btn.style.opacity = vazio ? '0.45' : '1';
+      btn.style.cursor = vazio ? 'default' : 'pointer';
+    }
+  }
+
+  fmtBrlMi(v){
+    const n = Number(v || 0);
+    if(Math.abs(n) >= 1e6) return 'R$ ' + (n / 1e6).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Mi';
+    if(Math.abs(n) >= 1e3) return 'R$ ' + (n / 1e3).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + ' Mil';
+    return this.fmtBrlFullCents(n);
+  }
+
+  fmtPct1(v){
+    return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+  }
+
+  abrirModalFora(){
+    const info = this._foraWinRate;
+    if(!info || !(info.orcamentos || []).length) return;
+    this._foraFiltro = '';
+    this._foraSort = null;
+    this._foraLista = [...info.orcamentos];
+    this.setState({ modalForaAberto: true });
+    setTimeout(() => this.preencherModalFora(), 30);
+  }
+
+  fecharModalFora(){
+    this.setState({ modalForaAberto: false });
+  }
+
+  preencherModalFora(){
+    const info = this._foraWinRate;
+    if(!info) return;
+    const mesFech = this.state.fechamentoIdx >= 0 ? this.mesesFechamento()[this.state.fechamentoIdx] : null;
+    const mesRotulo = mesFech?.rotulo;
+    this.setText('modal-fwr-rotulo', mesRotulo ? `Fora do Win Rate · ${mesRotulo}` : 'Fora do Win Rate');
+
+    const lista = (this._foraLista || []).filter((o) => !this._foraFiltro || o.mes_origem === this._foraFiltro);
+    const total = lista.reduce((acc, o) => acc + (o.valor_numero || 0), 0);
+    this.setText('modal-fwr-subtitulo', `${lista.length.toLocaleString('pt-BR')} orçamento(s) · ${this.fmtBrlMi(total)}`);
+
+    const filtros = document.getElementById('modal-fwr-filtros');
+    if(filtros){
+      const chip = (rotulo, valor, ativo) => `<button data-fwr-filtro="${this.escapeHtml(valor)}" style="border:none;font-family:inherit;font-size:12px;font-weight:700;border-radius:999px;padding:5px 12px;cursor:pointer;${ativo ? 'background:#2B50F0;color:#fff;' : 'background:#F1F5FF;color:#2B50F0;'}">${this.escapeHtml(rotulo)}</button>`;
+      filtros.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9AA4BE;margin-right:4px;">Mês de criação</span>`
+        + chip(`Todos · ${info.qtd_fmt}`, '', !this._foraFiltro)
+        + (info.origens || []).map((o) => chip(`${o.mes} · ${o.qtd_fmt}`, o.mes, this._foraFiltro === o.mes)).join('');
+      filtros.querySelectorAll('[data-fwr-filtro]').forEach((el) => {
+        el.onclick = () => { this._foraFiltro = el.dataset.fwrFiltro; this.preencherModalFora(); };
+      });
+    }
+
+    const downloadBtn = document.getElementById('modal-fwr-download-btn');
+    if(downloadBtn) downloadBtn.onclick = () => this.baixarOrcamentosFora(lista);
+
+    const tbody = document.getElementById('modal-fwr-tbody');
+    if(!tbody) return;
+    const td = 'padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;';
+    tbody.innerHTML = lista.map((o) => `<tr>
+      <td style="${td}white-space:nowrap;">${this.escapeHtml(o.orcamento)}</td>
+      <td style="${td}">${this.clienteComTag(o.cliente, o.cnpj, o.tipo_cliente)}</td>
+      <td style="${td}">${this.escapeHtml(o.vendedor) || '-'}</td>
+      <td style="${td}white-space:nowrap;">${this.escapeHtml(o.data_criacao)} <span style="display:inline-block;margin-left:6px;font-size:11px;font-weight:700;color:#35519E;background:#EEF2FF;border-radius:999px;padding:1px 8px;">${this.escapeHtml(o.mes_origem)}</span></td>
+      <td style="${td}white-space:nowrap;">${this.escapeHtml(o.data_faturamento)}</td>
+      <td style="${td}text-align:right;white-space:nowrap;">${o.dias_ate_faturar === 1 ? '1 dia' : `${o.dias_ate_faturar} dias`}</td>
+      <td style="${td}font-weight:700;text-align:right;white-space:nowrap;">${this.fmtBrlFullCents(o.valor_numero)}</td>
+    </tr>`).join('');
+
+    const colunas = [
+      { id: 'th-fwr-orc', campo: 'orcamento', tipo: 'numero' },
+      { id: 'th-fwr-cliente', campo: 'cliente', tipo: 'texto' },
+      { id: 'th-fwr-vendedor', campo: 'vendedor', tipo: 'texto' },
+      { id: 'th-fwr-criado', campo: 'data_criacao_iso', tipo: 'texto' },
+      { id: 'th-fwr-faturado', campo: 'data_faturamento_iso', tipo: 'texto' },
+      { id: 'th-fwr-dias', campo: 'dias_ate_faturar', tipo: 'numero' },
+      { id: 'th-fwr-valor', campo: 'valor_numero', tipo: 'numero' },
+    ];
+    colunas.forEach(({ id, campo, tipo }) => {
+      const thEl = document.getElementById(id);
+      if(thEl) thEl.onclick = () => this.ordenarModalFora(campo, tipo, id);
+      const seta = document.getElementById(`${id}-seta`);
+      if(!seta) return;
+      const ativo = this._foraSort && this._foraSort.thId === id;
+      seta.textContent = ativo ? (this._foraSort.dir === 1 ? '↑' : '↓') : '↕';
+      seta.style.opacity = ativo ? '1' : '0.35';
+    });
+  }
+
+  ordenarModalFora(campo, tipo, thId){
+    const atual = this._foraSort;
+    const dir = (atual && atual.campo === campo) ? -atual.dir : (tipo === 'numero' && campo !== 'orcamento' ? -1 : 1);
+    this._foraSort = { campo, tipo, dir, thId };
+    this._foraLista = [...(this._foraLista || [])].sort((a, b) => {
+      const va = a[campo];
+      const vb = b[campo];
+      if(tipo === 'texto') return String(va ?? '').localeCompare(String(vb ?? ''), 'pt-BR') * dir;
+      return (Number(va) - Number(vb)) * dir;
+    });
+    this.preencherModalFora();
+  }
+
+  baixarOrcamentosFora(lista){
+    if(!lista || lista.length === 0) return;
+    const headers = ['Orçamento', 'Cliente', 'Segmento', 'Vendedor', 'Criado em', 'Mês de criação', 'Faturado em', 'Dias até faturar', 'Valor faturado'];
+    const escapeCsv = (v) => {
+      const s = String(v ?? '');
+      return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const linhas = lista.map((o) => [
+      o.orcamento, o.cliente, this.textoSegmento(o.cnpj, o.tipo_cliente), o.vendedor, o.data_criacao, o.mes_origem, o.data_faturamento,
+      o.dias_ate_faturar, this.fmtBrlFullCents(o.valor_numero),
+    ].map(escapeCsv).join(';'));
+    const csv = '﻿' + headers.join(';') + '\n' + linhas.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'orcamentos_faturados_meses_anteriores.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   applyResumoAtualData(){
@@ -1005,7 +1163,10 @@ class Component extends DCLogic {
       }
 
       const topAberto = data.em_aberto?.top_5?.[i] || {};
-      this.setText(`rs-top-aberto-orc-${i}`, topAberto.orcamento ? `${topAberto.orcamento} | ${topAberto.cliente || ''}` : '-');
+      const elTopAberto = document.getElementById(`rs-top-aberto-orc-${i}`);
+      if(elTopAberto) elTopAberto.innerHTML = topAberto.orcamento
+        ? `${this.escapeHtml(topAberto.orcamento)} | ${this.tagSegmento(topAberto.cnpj, topAberto.tipo_cliente)}${this.escapeHtml(topAberto.cliente || '')}`
+        : '-';
       this.setText(`rs-top-aberto-valor-${i}`, topAberto.orcamento ? this.fmtBrlFullCents(topAberto.valor_numero) : '-');
       this.setText(`rs-top-aberto-vendedor-${i}`, topAberto.vendedor || '-');
       this.setText(`rs-top-aberto-status-${i}`, topAberto.status || '-');
@@ -1020,7 +1181,10 @@ class Component extends DCLogic {
         : '';
 
       const topPerdido = data.perdido?.top_5?.[i] || {};
-      this.setText(`rs-top-perdido-orc-${i}`, topPerdido.orcamento ? `${topPerdido.orcamento} | ${topPerdido.cliente || ''}` : '-');
+      const elTopPerdido = document.getElementById(`rs-top-perdido-orc-${i}`);
+      if(elTopPerdido) elTopPerdido.innerHTML = topPerdido.orcamento
+        ? `${this.escapeHtml(topPerdido.orcamento)} | ${this.tagSegmento(topPerdido.cnpj, topPerdido.tipo_cliente)}${this.escapeHtml(topPerdido.cliente || '')}`
+        : '-';
       this.setText(`rs-top-perdido-valor-${i}`, topPerdido.orcamento ? this.fmtBrlFullCents(topPerdido.valor_numero) : '-');
       this.setText(`rs-top-perdido-vendedor-${i}`, topPerdido.vendedor || '-');
       this.setText(`rs-top-perdido-status-${i}`, topPerdido.status || '-');
@@ -1331,7 +1495,7 @@ class Component extends DCLogic {
       return `<tr>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(orc.orcamento)}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(orc.data_criacao)}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.escapeHtml(orc.cliente) || '-'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.clienteComTag(orc.cliente, orc.cnpj, orc.tipo_cliente)}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(orc.tipo_cliente) || '-'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.escapeHtml(orc.vendedor) || '-'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;text-align:center;">${revisaoIcon}</td>
@@ -1397,13 +1561,13 @@ class Component extends DCLogic {
   baixarOrcamentosStatus(statusInfo){
     const orcamentos = statusInfo?.orcamentos || [];
     if(orcamentos.length === 0) return;
-    const headers = ['Orçamento', 'Cliente', 'Tipo Cliente', 'Vendedor', 'Criado em', 'Revisão do Gestor', 'Valor'];
+    const headers = ['Orçamento', 'Cliente', 'Segmento', 'Tipo Cliente', 'Vendedor', 'Criado em', 'Revisão do Gestor', 'Valor'];
     const escapeCsv = (v) => {
       const s = String(v ?? '');
       return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
     };
     const linhas = orcamentos.map((o) => [
-      o.orcamento, o.cliente, o.tipo_cliente, o.vendedor, o.data_criacao,
+      o.orcamento, o.cliente, this.textoSegmento(o.cnpj, o.tipo_cliente), o.tipo_cliente, o.vendedor, o.data_criacao,
       o.revisao_gestor ? 'Sim' : 'Não', this.fmtBrlFullCents(o.valor_numero),
     ].map(escapeCsv).join(';'));
     const csv = '﻿' + headers.join(';') + '\n' + linhas.join('\n');
@@ -1421,7 +1585,10 @@ class Component extends DCLogic {
 
   preencherModalOrcamento(orc){
     this.setText('modal-orc-titulo', `Orçamento ${orc.orcamento || '-'}`);
-    this.setText('modal-orc-cliente', orc.cliente || '-');
+    const elOrcCliente = document.getElementById('modal-orc-cliente');
+    if(elOrcCliente) elOrcCliente.innerHTML = orc.cliente
+      ? this.tagSegmento(orc.cnpj, orc.tipo_cliente, true) + this.escapeHtml(orc.cliente)
+      : '-';
     this.setText('modal-orc-criado', orc.data_criacao || '-');
     this.setText('modal-orc-tipo-cliente', orc.tipo_cliente || '-');
     this.setText('modal-orc-vendedor', orc.vendedor || '-');
@@ -1631,7 +1798,7 @@ class Component extends DCLogic {
     tbody.innerHTML = linhas.map((l, idx) => `<tr>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(l.num_orcamento)}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(l.data_criacao)}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.escapeHtml(l.cliente) || '-'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.clienteComTag(l.cliente, l.cnpj, l.tipo_cliente)}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(l.tipo_cliente) || '-'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.escapeHtml(l.vendedor) || '-'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;text-align:center;white-space:nowrap;">${l.passou_revisao_gestor ? '<span class="material-symbols-outlined" style="font-size:19px;color:#2B50F0;" title="Passou por revisão do gestor" aria-label="Passou por revisão do gestor">how_to_reg</span>' : '<span class="material-symbols-outlined" style="font-size:19px;color:#C7CEDD;" title="Sem revisão do gestor" aria-label="Sem revisão do gestor">how_to_reg</span>'}</td>
@@ -1648,6 +1815,7 @@ class Component extends DCLogic {
       if(btn) btn.onclick = () => this.abrirModalOrcamento({
         orcamento: l.num_orcamento,
         cliente: l.cliente,
+        cnpj: l.cnpj,
         data_criacao: l.data_criacao,
         tipo_cliente: l.tipo_cliente,
         vendedor: l.vendedor,
@@ -1766,6 +1934,9 @@ class Component extends DCLogic {
       fecharModalOrcamento: () => this.fecharModalOrcamento(),
       modalStatusAberto: this.state.modalStatusAberto,
       fecharModalStatus: () => this.fecharModalStatus(),
+      modalForaAberto: this.state.modalForaAberto,
+      abrirModalFora: () => this.abrirModalFora(),
+      fecharModalFora: () => this.fecharModalFora(),
       modalHistoricoAberto: this.state.modalHistoricoAberto,
       abrirModalHistorico: () => this.abrirModalHistorico(),
       fecharModalHistorico: () => this.fecharModalHistorico(),
