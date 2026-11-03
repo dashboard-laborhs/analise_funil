@@ -614,9 +614,9 @@
 <div style="display:flex;align-items:center;gap:16px;">
 <span style="display:inline-block;font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2B50F0;background:#F1F5FF;border-radius:8px;padding:6px 12px;">Funil em Volume de Orçamentos</span>
 <span style="display:flex;align-items:center;gap:14px;margin-left:auto;">
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#6E93FF;"></span>Enviados para Aprovação</span>
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#3D5FE8;"></span>Faturados</span>
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#2E6B5C;"></span>Win Rate Volume</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#B9CFFF;"></span>Enviados para Aprovação</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#2B50F0;"></span>Faturados</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#1E7F2C;"></span>Win Rate Volume</span>
 </span>
 </div>
 <div id="modal-historico-chart-volume"></div>
@@ -625,9 +625,9 @@
 <div style="display:flex;align-items:center;gap:16px;">
 <span style="display:inline-block;font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2B50F0;background:#F1F5FF;border-radius:8px;padding:6px 12px;">Funil em Valor de Orçamentos</span>
 <span style="display:flex;align-items:center;gap:14px;margin-left:auto;">
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#8FB0FF;"></span>Enviados para Aprovação</span>
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#4A6FE0;"></span>Faturados</span>
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#2E6B5C;"></span>Win Rate Valor</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#B9CFFF;"></span>Enviados para Aprovação</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#2B50F0;"></span>Faturados</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#1E7F2C;"></span>Win Rate Valor</span>
 </span>
 </div>
 <div id="modal-historico-chart-valor"></div>
@@ -1434,7 +1434,7 @@ class Component extends DCLogic {
     const areaFaturados = `<path d="${pathArea(faturados, yAt)}" fill="${corSerieEscura}" opacity="0.75"/>`;
     const linhaEnviados = `<path d="${pathLine(enviados, yAt)}" fill="none" stroke="${corSerieClara}" stroke-width="2"/>`;
     const linhaFaturados = `<path d="${pathLine(faturados, yAt)}" fill="none" stroke="${corSerieEscura}" stroke-width="2"/>`;
-    const linhaWinRate = `<path d="${pathLine(winRatePct, yAtPct)}" fill="none" stroke="#2E6B5C" stroke-width="2.5"/>`;
+    const linhaWinRate = `<path d="${pathLine(winRatePct, yAtPct)}" fill="none" stroke="#1E7F2C" stroke-width="2.5"/>`;
 
     const rotulosEnviados = enviados.map((v, i) => {
       const y = yAt(v) + 17;
@@ -1450,7 +1450,7 @@ class Component extends DCLogic {
       const centerY = y - 16;
       const label = p.toFixed(1).replace('.', ',') + '%';
       const boxW = 16 + label.length * 6.6;
-      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="#2E6B5C"/><rect x="${(x - boxW / 2).toFixed(1)}" y="${(centerY - 10).toFixed(1)}" width="${boxW.toFixed(1)}" height="19" rx="9.5" fill="#E1F0EA"/><text x="${x.toFixed(1)}" y="${(centerY + 4).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#2E6B5C">${label}</text>`;
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="#1E7F2C"/><rect x="${(x - boxW / 2).toFixed(1)}" y="${(centerY - 10).toFixed(1)}" width="${boxW.toFixed(1)}" height="19" rx="9.5" fill="#E3F7E3"/><text x="${x.toFixed(1)}" y="${(centerY + 4).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#1E7F2C">${label}</text>`;
     }).join('');
 
     const eixoX = meses.map((m, i) => `<text x="${xAt(i).toFixed(1)}" y="${(height - 6).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="600" fill="#9AA4BE">${this.escapeHtml(m)}</text>`).join('');
@@ -1469,7 +1469,7 @@ class Component extends DCLogic {
       volumeEl.innerHTML = this.montarGraficoHistorico(
         data.meses, data.volume.enviados, data.volume.enviados_fmt,
         data.volume.faturados, data.volume.faturados_fmt, data.volume.win_rate_pct,
-        '#6E93FF', '#3D5FE8'
+        '#B9CFFF', '#2B50F0'
       );
     }
 
@@ -1478,7 +1478,7 @@ class Component extends DCLogic {
       valorEl.innerHTML = this.montarGraficoHistorico(
         data.meses, data.valor.enviados, data.valor.enviados_fmt,
         data.valor.faturados, data.valor.faturados_fmt, data.valor.win_rate_pct,
-        '#8FB0FF', '#4A6FE0'
+        '#B9CFFF', '#2B50F0'
       );
     }
   }
