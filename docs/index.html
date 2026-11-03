@@ -30,6 +30,25 @@
   .seg-GOLD{background:#FDEDD1;color:#B97307;}
   .seg-STANDARD{background:#EDEAE5;color:#624747;}
   .seg-SEM{background:#F0F0F1;color:#8E95A7;}
+  .seg-tip-box{position:fixed;z-index:10000;width:270px;background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(24,38,90,0.24);padding:14px 16px;font-size:11.5px;font-weight:400;line-height:1.5;letter-spacing:normal;text-transform:none;text-align:left;color:#3C4666;pointer-events:none;opacity:0;transform:translateY(-6px);transition:opacity .18s ease, transform .18s ease;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+  .seg-tip-box.visivel{opacity:1;transform:translateY(0);}
+  .seg-tip-box .info-tip-title{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#7C88A6;margin-bottom:10px;}
+  .seg-tip-box .info-tip-dot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .seg-tip-box ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;}
+  .seg-tip-box li b{color:#0E1A3A;}
+  .seg-tip-box b{color:#0E1A3A;}
+  .seg-tip-box.tabela{width:455px;}
+  .seg-tip-texto{margin-bottom:8px;font-size:11.5px;}
+  .seg-tip-tabela{width:100%;border-collapse:collapse;font-size:11px;}
+  .seg-tip-tabela th{font-size:9px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#9AA4BE;text-align:right;padding:0 6px 6px;line-height:1.3;vertical-align:bottom;}
+  .seg-tip-tabela th:first-child,.seg-tip-tabela td:first-child{text-align:left;padding-left:6px;}
+  .seg-tip-tabela td{padding:5px 6px;border-top:1px solid #E7EBF5;text-align:right;white-space:nowrap;color:#3C4666;}
+  .seg-tip-tabela td:first-child{font-weight:700;color:#0E1A3A;}
+  .seg-tip-tabela td[colspan]{text-align:left;color:#7C88A6;}
+  .seg-tip-tabela tr.atual td{background:#F1F5FF;font-weight:700;color:#0E1A3A;}
+  .seg-tip-tabela tr.atual td:first-child{border-radius:8px 0 0 8px;}
+  .seg-tip-tabela tr.atual td:last-child{border-radius:0 8px 8px 0;}
+  .seg-tip-rodape{margin-top:8px;font-size:10.5px;line-height:1.45;color:#7C88A6;}
   @keyframes softEnter{
     from{opacity:0;transform:translateY(12px);}
     to{opacity:1;transform:translateY(0);}
@@ -109,7 +128,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
         <sc-if value="{{ temFiltroGrupo }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;align-items:center;gap:4px;background:#fff;border:1px solid #D7DDEC;border-radius:999px;padding:4px 6px 4px 14px;box-shadow:0 2px 10px rgba(20,30,70,0.06);" title="Filtra as 3 páginas por um grupo de vendas. Sem nenhum marcado, mostra todos. O histórico mostra sempre todos.">
+        <div style="display:flex;align-items:center;gap:4px;background:#fff;border:1px solid #D7DDEC;border-radius:999px;padding:4px 6px 4px 14px;box-shadow:0 2px 10px rgba(20,30,70,0.06);">
           <span style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#9AA4BE;margin-right:2px;white-space:nowrap;">Grupo Vendas</span>
           <sc-if value="{{ grupoInternoDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleInterno }}" style="{{ grupoBtnStyle }}"><span style="{{ grupoInternoBox }}">✓</span>Vendedor Interno</button></sc-if>
           <sc-if value="{{ grupoRepresentantesDisp }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleRepresentantes }}" style="{{ grupoBtnStyle }}"><span style="{{ grupoRepresentantesBox }}">✓</span>Representantes</button></sc-if>
@@ -782,6 +801,9 @@ class Component extends DCLogic {
     window.removeEventListener('resize', this._onResize);
     window.visualViewport?.removeEventListener('resize', this._onResize);
     if(this._raf) cancelAnimationFrame(this._raf);
+    if(this._onSegOver) document.removeEventListener('mouseover', this._onSegOver);
+    if(this._onSegScroll) document.removeEventListener('scroll', this._onSegScroll, true);
+    this._segTip?.remove();
   }
 
   fit(){
@@ -835,6 +857,7 @@ class Component extends DCLogic {
         if(cnpj && seg) mapa[cnpj.padStart(14, '0')] = seg;
       });
       this._segPorCnpj = mapa;
+      this.iniciarTooltipSegmento();
       this.applyResumoAtualData();
       if(this.state.modalStatusAberto && this.state.modalStatus) this.preencherModalStatus(this.state.modalStatus);
       if(this.state.modalAberto && this.state.modalItem) this.preencherModal(this.state.modalItem);
@@ -848,35 +871,100 @@ class Component extends DCLogic {
     document.head.appendChild(script);
   }
 
+  segmentoDoArquivo(cnpj){
+    const doc = String(cnpj || '').replace(/\D/g, '');
+    return doc && this._segPorCnpj ? this._segPorCnpj[doc.padStart(14, '0')] || null : null;
+  }
+
+  // Tooltip das tags de segmento, no visual dos tooltips "i". Fica fora do
+  // painel (position:fixed) para nao ser cortado pela rolagem das tabelas.
+  iniciarTooltipSegmento(){
+    if(this._segTip) return;
+    const box = document.createElement('div');
+    box.className = 'seg-tip-box';
+    box.setAttribute('role', 'tooltip');
+    document.body.appendChild(box);
+    this._segTip = box;
+    const cores = { DIAMOND: '#0B33DD', PLATINUM: '#001E51', GOLD: '#B97307', STANDARD: '#624747', 'SEM SEGMENTO': '#8E95A7' };
+    const meta = () => window.LABOR_SEGMENTACAO_META || {};
+    const esconder = () => { box.classList.remove('visivel'); this._segTipAlvo = null; };
+    this._onSegOver = (e) => {
+      const alvo = e.target.closest ? e.target.closest('[data-seg]') : null;
+      if(!alvo){ if(this._segTipAlvo) esconder(); return; }
+      if(alvo === this._segTipAlvo) return;
+      this._segTipAlvo = alvo;
+      const seg = alvo.dataset.seg;
+      const sem = seg === 'SEM SEGMENTO';
+      const tabela = [
+        ['DIAMOND', 'R$ 350.000', 'R$ 135.000', '10', '7'],
+        ['PLATINUM', 'R$ 25.000', 'R$ 6.300', '9', '5'],
+        ['GOLD', 'R$ 9.500', 'R$ 2.300', '6', '3'],
+      ];
+      let html = `<span class="info-tip-title"><span class="info-tip-dot" style="background:${cores[seg] || '#8E95A7'};"></span>${sem ? 'Sem segmento' : 'Segmento ' + this.escapeHtml(seg)}</span>`;
+      if(sem){
+        html += '<div class="seg-tip-texto"><b>Cliente final</b> não entra na segmentação, que é só para clientes de revenda.</div>';
+      } else {
+        if(alvo.dataset.segPadrao) html += '<div class="seg-tip-texto">Revenda fora da base de segmentação, <b>considerada STANDARD</b>.</div>';
+        const linha = (r) => `<tr class="${r[0] === seg ? 'atual' : ''}"><td><span class="seg-ini seg-${r[0]}">${r[0].charAt(0)}</span>${r[0]}</td><td>≥ ${r[1]}</td><td>≥ ${r[2]}</td><td>≥ ${r[3]}</td><td>≥ ${r[4]}</td></tr>`;
+        html += '<table class="seg-tip-tabela"><thead><tr><th>Segmento</th><th>Fat. médio<br>mensal</th><th>Cash margin<br>média mensal</th><th>Meses com<br>compra (de 12)</th><th>Média<br>de SKUs</th></tr></thead><tbody>'
+          + tabela.map(linha).join('')
+          + `<tr class="${seg === 'STANDARD' ? 'atual' : ''}"><td><span class="seg-ini seg-STANDARD">S</span>STANDARD</td><td colspan="4">demais clientes</td></tr>`
+          + '</tbody></table>';
+        html += `<div class="seg-tip-rodape">Entra no maior segmento em que atende aos 4 critérios ao mesmo tempo. Calculado por coligada, nos últimos 12 meses fechados.${meta().source ? ' ' + this.escapeHtml(meta().source) + '.' : ''}</div>`;
+      }
+      box.innerHTML = html;
+      box.classList.toggle('tabela', !sem);
+      const r = alvo.getBoundingClientRect();
+      const largura = box.offsetWidth, altura = box.offsetHeight;
+      const left = Math.max(8, Math.min(r.left, window.innerWidth - largura - 8));
+      const top = r.bottom + 10 + altura > window.innerHeight - 8 ? r.top - 10 - altura : r.bottom + 10;
+      box.style.left = left + 'px';
+      box.style.top = Math.max(8, top) + 'px';
+      box.classList.add('visivel');
+    };
+    this._onSegScroll = () => { if(this._segTipAlvo) esconder(); };
+    document.addEventListener('mouseover', this._onSegOver);
+    document.addEventListener('scroll', this._onSegScroll, true);
+  }
+
   // Segmento do cliente. Revenda fora do arquivo = STANDARD; cliente final
   // (fora da segmentacao) = 'SEM SEGMENTO' (tag cinza "-"). Sem arquivo = null.
-  segmentoCliente(cnpj, tipoCliente){
+  // Segmento de um orcamento (linha com cliente, cnpj e tipo_cliente). Quando
+  // a automacao ja gravou o segmento do dia (campo "segmento"), usa ele: assim
+  // as fotos de fechamento mostram o segmento daquele mes. Senao, busca no
+  // arquivo de segmentacao. Revenda fora da base = STANDARD; cliente final =
+  // 'SEM SEGMENTO' (tag cinza "-"). Sem nenhum dos dois = null (sem tag).
+  segmentoDe(o){
+    o = o || {};
+    if(o.segmento) return { seg: o.segmento, padrao: !!o.segmento_padrao };
     if(!this._segPorCnpj) return null;
-    const doc = String(cnpj || '').replace(/\D/g, '');
-    const seg = doc ? this._segPorCnpj[doc.padStart(14, '0')] : null;
-    if(seg) return seg;
-    return /revend/i.test(String(tipoCliente || '')) ? 'STANDARD' : 'SEM SEGMENTO';
+    const seg = this.segmentoDoArquivo(o.cnpj);
+    if(seg) return { seg, padrao: false };
+    return /revend/i.test(String(o.tipo_cliente || ''))
+      ? { seg: 'STANDARD', padrao: true }
+      : { seg: 'SEM SEGMENTO', padrao: false };
   }
 
-  tagSegmento(cnpj, tipoCliente, nomeCompleto){
-    const seg = this.segmentoCliente(cnpj, tipoCliente);
-    if(!seg) return '';
+  tagSegmento(o, nomeCompleto){
+    const info = this.segmentoDe(o);
+    if(!info) return '';
+    const seg = info.seg;
     const sem = seg === 'SEM SEGMENTO';
     const classe = 'seg-' + (sem ? 'SEM' : seg);
-    const titulo = sem ? 'Sem segmento (cliente final)' : `Segmento ${seg}`;
-    if(nomeCompleto) return `<span class="seg-nome ${classe}" title="${this.escapeHtml(titulo)}">${this.escapeHtml(seg)}</span>`;
-    return `<span class="seg-ini ${classe}" title="${this.escapeHtml(titulo)}">${sem ? '-' : this.escapeHtml(seg.charAt(0))}</span>`;
+    const attrs = `data-seg="${this.escapeHtml(seg)}"${info.padrao ? ' data-seg-padrao="1"' : ''}`;
+    if(nomeCompleto) return `<span class="seg-nome ${classe}" ${attrs}>${this.escapeHtml(seg)}</span>`;
+    return `<span class="seg-ini ${classe}" ${attrs}>${sem ? '-' : this.escapeHtml(seg.charAt(0))}</span>`;
   }
 
-  clienteComTag(cliente, cnpj, tipoCliente){
+  clienteComTag(cliente, o){
     const nome = this.escapeHtml(cliente);
     if(!nome) return '-';
-    const tag = this.tagSegmento(cnpj, tipoCliente);
+    const tag = this.tagSegmento(o);
     return tag ? `<span style="white-space:nowrap;">${tag}${nome}</span>` : nome;
   }
 
-  textoSegmento(cnpj, tipoCliente){
-    return this.segmentoCliente(cnpj, tipoCliente) || '';
+  textoSegmento(o){
+    return this.segmentoDe(o)?.seg || '';
   }
 
   setText(id, value){
@@ -1048,7 +1136,7 @@ class Component extends DCLogic {
     const td = 'padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;';
     tbody.innerHTML = lista.map((o) => `<tr>
       <td style="${td}white-space:nowrap;">${this.escapeHtml(o.orcamento)}</td>
-      <td style="${td}">${this.clienteComTag(o.cliente, o.cnpj, o.tipo_cliente)}</td>
+      <td style="${td}">${this.clienteComTag(o.cliente, o)}</td>
       <td style="${td}">${this.escapeHtml(o.vendedor) || '-'}</td>
       <td style="${td}white-space:nowrap;">${this.escapeHtml(o.data_criacao)} <span style="display:inline-block;margin-left:6px;font-size:11px;font-weight:700;color:#35519E;background:#EEF2FF;border-radius:999px;padding:1px 8px;">${this.escapeHtml(o.mes_origem)}</span></td>
       <td style="${td}white-space:nowrap;">${this.escapeHtml(o.data_faturamento)}</td>
@@ -1097,7 +1185,7 @@ class Component extends DCLogic {
       return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
     };
     const linhas = lista.map((o) => [
-      o.orcamento, o.cliente, this.textoSegmento(o.cnpj, o.tipo_cliente), o.vendedor, o.data_criacao, o.mes_origem, o.data_faturamento,
+      o.orcamento, o.cliente, this.textoSegmento(o), o.vendedor, o.data_criacao, o.mes_origem, o.data_faturamento,
       o.dias_ate_faturar, this.fmtBrlFullCents(o.valor_numero),
     ].map(escapeCsv).join(';'));
     const csv = '﻿' + headers.join(';') + '\n' + linhas.join('\n');
@@ -1166,7 +1254,7 @@ class Component extends DCLogic {
       const topAberto = data.em_aberto?.top_5?.[i] || {};
       const elTopAberto = document.getElementById(`rs-top-aberto-orc-${i}`);
       if(elTopAberto) elTopAberto.innerHTML = topAberto.orcamento
-        ? `${this.escapeHtml(topAberto.orcamento)} | ${this.tagSegmento(topAberto.cnpj, topAberto.tipo_cliente)}${this.escapeHtml(topAberto.cliente || '')}`
+        ? `${this.escapeHtml(topAberto.orcamento)} | ${this.tagSegmento(topAberto)}${this.escapeHtml(topAberto.cliente || '')}`
         : '-';
       this.setText(`rs-top-aberto-valor-${i}`, topAberto.orcamento ? this.fmtBrlFullCents(topAberto.valor_numero) : '-');
       this.setText(`rs-top-aberto-vendedor-${i}`, topAberto.vendedor || '-');
@@ -1184,7 +1272,7 @@ class Component extends DCLogic {
       const topPerdido = data.perdido?.top_5?.[i] || {};
       const elTopPerdido = document.getElementById(`rs-top-perdido-orc-${i}`);
       if(elTopPerdido) elTopPerdido.innerHTML = topPerdido.orcamento
-        ? `${this.escapeHtml(topPerdido.orcamento)} | ${this.tagSegmento(topPerdido.cnpj, topPerdido.tipo_cliente)}${this.escapeHtml(topPerdido.cliente || '')}`
+        ? `${this.escapeHtml(topPerdido.orcamento)} | ${this.tagSegmento(topPerdido)}${this.escapeHtml(topPerdido.cliente || '')}`
         : '-';
       this.setText(`rs-top-perdido-valor-${i}`, topPerdido.orcamento ? this.fmtBrlFullCents(topPerdido.valor_numero) : '-');
       this.setText(`rs-top-perdido-vendedor-${i}`, topPerdido.vendedor || '-');
@@ -1496,7 +1584,7 @@ class Component extends DCLogic {
       return `<tr>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(orc.orcamento)}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(orc.data_criacao)}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.clienteComTag(orc.cliente, orc.cnpj, orc.tipo_cliente)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.clienteComTag(orc.cliente, orc)}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(orc.tipo_cliente) || '-'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.escapeHtml(orc.vendedor) || '-'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;text-align:center;">${revisaoIcon}</td>
@@ -1568,7 +1656,7 @@ class Component extends DCLogic {
       return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
     };
     const linhas = orcamentos.map((o) => [
-      o.orcamento, o.cliente, this.textoSegmento(o.cnpj, o.tipo_cliente), o.tipo_cliente, o.vendedor, o.data_criacao,
+      o.orcamento, o.cliente, this.textoSegmento(o), o.tipo_cliente, o.vendedor, o.data_criacao,
       o.revisao_gestor ? 'Sim' : 'Não', this.fmtBrlFullCents(o.valor_numero),
     ].map(escapeCsv).join(';'));
     const csv = '﻿' + headers.join(';') + '\n' + linhas.join('\n');
@@ -1588,7 +1676,7 @@ class Component extends DCLogic {
     this.setText('modal-orc-titulo', `Orçamento ${orc.orcamento || '-'}`);
     const elOrcCliente = document.getElementById('modal-orc-cliente');
     if(elOrcCliente) elOrcCliente.innerHTML = orc.cliente
-      ? this.tagSegmento(orc.cnpj, orc.tipo_cliente, true) + this.escapeHtml(orc.cliente)
+      ? this.tagSegmento(orc, true) + this.escapeHtml(orc.cliente)
       : '-';
     this.setText('modal-orc-criado', orc.data_criacao || '-');
     this.setText('modal-orc-tipo-cliente', orc.tipo_cliente || '-');
@@ -1799,7 +1887,7 @@ class Component extends DCLogic {
     tbody.innerHTML = linhas.map((l, idx) => `<tr>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(l.num_orcamento)}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(l.data_criacao)}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.clienteComTag(l.cliente, l.cnpj, l.tipo_cliente)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.clienteComTag(l.cliente, l)}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;white-space:nowrap;">${this.escapeHtml(l.tipo_cliente) || '-'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;font-size:13px;color:#0E1A3A;">${this.escapeHtml(l.vendedor) || '-'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7EBF5;text-align:center;white-space:nowrap;">${l.passou_revisao_gestor ? '<span class="material-symbols-outlined" style="font-size:19px;color:#2B50F0;" title="Passou por revisão do gestor" aria-label="Passou por revisão do gestor">how_to_reg</span>' : '<span class="material-symbols-outlined" style="font-size:19px;color:#C7CEDD;" title="Sem revisão do gestor" aria-label="Sem revisão do gestor">how_to_reg</span>'}</td>
@@ -1817,6 +1905,8 @@ class Component extends DCLogic {
         orcamento: l.num_orcamento,
         cliente: l.cliente,
         cnpj: l.cnpj,
+        segmento: l.segmento,
+        segmento_padrao: l.segmento_padrao,
         data_criacao: l.data_criacao,
         tipo_cliente: l.tipo_cliente,
         vendedor: l.vendedor,
