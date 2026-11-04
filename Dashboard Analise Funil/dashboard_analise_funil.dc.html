@@ -61,6 +61,9 @@
     from{opacity:0;transform:scale(0.96) translateY(8px);}
     to{opacity:1;transform:scale(1) translateY(0);}
   }
+  .wr-zoom-overlay{position:fixed;inset:0;background:rgba(14,26,58,0.55);display:flex;align-items:center;justify-content:center;z-index:80;animation:modalOverlayIn .18s ease;cursor:zoom-out;}
+  .wr-zoom-painel{position:relative;background:#fff;border-radius:22px;padding:38px 22px 22px;box-shadow:0 24px 60px rgba(24,38,90,0.3);display:flex;flex-direction:column;gap:9px;transform-origin:center center;cursor:default;}
+  .wr-zoom-fechar{position:absolute;top:8px;right:8px;border:none;background:#F1F5FF;border-radius:9px;width:26px;height:26px;font-size:15px;cursor:pointer;color:#5B6478;}
   .hover-scale{transition:transform .18s ease;}
   .hover-scale:hover{transform:scale(1.025);}
   .info-tip{position:relative;display:inline-flex;}
@@ -193,7 +196,7 @@
           <div style="display:flex;flex-direction:column;gap:9px;">
 
             <!-- Grupo Valor -->
-            <div class="hover-scale" style="display:flex;align-items:center;gap:18px;background:#EEF2FF;border:1px solid #D9E2F7;border-radius:18px;padding:16px 20px;">
+            <div class="hover-scale wr-zoom" title="Clique para ampliar" style="cursor:zoom-in;display:flex;align-items:center;gap:18px;background:#EEF2FF;border:1px solid #D9E2F7;border-radius:18px;padding:16px 20px;">
               <div style="position:relative;width:108px;height:108px;flex:none;">
                 <div id="cr-cur-wr-val-ring" class="winring" data-pct="52.76" data-fill="#3D5FE0" data-track="#E2E7F4" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#3D5FE0 0%, #E2E7F4 0%);"></div>
                 <div style="position:absolute;inset:12px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;">
@@ -232,7 +235,7 @@
             </div>
 
             <!-- Grupo Quantidade -->
-            <div class="hover-scale" style="display:flex;align-items:center;gap:18px;background:#EEF2FF;border:1px solid #D9E2F7;border-radius:18px;padding:16px 20px;margin-top:5px;">
+            <div class="hover-scale wr-zoom" title="Clique para ampliar" style="cursor:zoom-in;display:flex;align-items:center;gap:18px;background:#EEF2FF;border:1px solid #D9E2F7;border-radius:18px;padding:16px 20px;margin-top:5px;">
               <div style="position:relative;width:108px;height:108px;flex:none;">
                 <div id="cr-cur-wr-qtd-ring" class="winring" data-pct="64.97" data-fill="#1E3FC4" data-track="#E2E7F4" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#1E3FC4 0%, #E2E7F4 0%);"></div>
                 <div style="position:absolute;inset:12px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;">
@@ -277,7 +280,7 @@
           <div style="display:flex;flex-direction:column;gap:9px;">
 
             <!-- Grupo Valor -->
-            <div class="hover-scale" style="display:flex;align-items:center;gap:18px;background:#F2F5FC;border:1px solid #DCE6F5;border-radius:18px;padding:16px 20px;">
+            <div class="hover-scale wr-zoom" title="Clique para ampliar" style="cursor:zoom-in;display:flex;align-items:center;gap:18px;background:#F2F5FC;border:1px solid #DCE6F5;border-radius:18px;padding:16px 20px;">
               <div style="position:relative;width:108px;height:108px;flex:none;">
                 <div id="cr-prev-wr-val-ring" class="winring" data-pct="63.27" data-fill="#8FA3C7" data-track="#DCE6F5" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#8FA3C7 0%, #DCE6F5 0%);"></div>
                 <div style="position:absolute;inset:12px;border-radius:50%;background:#F2F5FC;display:flex;align-items:center;justify-content:center;">
@@ -310,7 +313,7 @@
             </div>
 
             <!-- Grupo Quantidade -->
-            <div class="hover-scale" style="display:flex;align-items:center;gap:18px;background:#F2F5FC;border:1px solid #DCE6F5;border-radius:18px;padding:16px 20px;margin-top:5px;">
+            <div class="hover-scale wr-zoom" title="Clique para ampliar" style="cursor:zoom-in;display:flex;align-items:center;gap:18px;background:#F2F5FC;border:1px solid #DCE6F5;border-radius:18px;padding:16px 20px;margin-top:5px;">
               <div style="position:relative;width:108px;height:108px;flex:none;">
                 <div id="cr-prev-wr-qtd-ring" class="winring" data-pct="69.45" data-fill="#8FA3C7" data-track="#DCE6F5" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#8FA3C7 0%, #DCE6F5 0%);"></div>
                 <div style="position:absolute;inset:12px;border-radius:50%;background:#F2F5FC;display:flex;align-items:center;justify-content:center;">
@@ -660,6 +663,7 @@ class Component extends DCLogic {
     window.addEventListener('resize', this._onResize);
     window.visualViewport?.addEventListener('resize', this._onResize);
     this.iniciarFiltroGrupo();
+    this.iniciarZoomWinRate();
     this.applyResumoAtualData();
     this.applyComparativoData();
     this.applyTopItensData();
@@ -809,7 +813,64 @@ class Component extends DCLogic {
     }, 30);
   }
 
+  // Clique num quadro de win rate (valor ou quantidade, atual ou anterior):
+  // abre o quadro ampliado, com o periodo e as duas linhas de baixo, para
+  // apresentar. Fecha com clique fora, no X ou com Esc.
+  iniciarZoomWinRate(){
+    const fechar = () => {
+      this._wrZoom?.remove();
+      this._wrZoom = null;
+    };
+    this._onWrZoomKey = (e) => { if(e.key === 'Escape') fechar(); };
+    this._onWrZoomClick = (e) => {
+      const caixa = e.target.closest?.('.wr-zoom');
+      if(!caixa || this._wrZoom || e.target.closest('.info-tip')) return;
+      const coluna = caixa.parentElement;
+      const grade = coluna?.parentElement;
+      const idx = grade ? Array.from(grade.children).indexOf(coluna) : -1;
+      const faixa = grade?.previousElementSibling?.children?.[idx];
+      const partes = [faixa, caixa, caixa.nextElementSibling, caixa.nextElementSibling?.nextElementSibling].filter(Boolean);
+      const largura = caixa.offsetWidth;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'wr-zoom-overlay';
+      const painel = document.createElement('div');
+      painel.className = 'wr-zoom-painel';
+      painel.style.width = `${largura + 44}px`;
+      partes.forEach((el) => {
+        const copia = el.cloneNode(true);
+        copia.classList.remove('hover-scale', 'wr-zoom');
+        copia.removeAttribute('title');
+        copia.removeAttribute('id');
+        copia.style.cursor = 'default';
+        copia.style.marginTop = '0';
+        copia.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+        painel.appendChild(copia);
+      });
+      const botao = document.createElement('button');
+      botao.className = 'wr-zoom-fechar';
+      botao.setAttribute('aria-label', 'Fechar');
+      botao.textContent = '×';
+      botao.addEventListener('click', fechar);
+      painel.appendChild(botao);
+      painel.addEventListener('click', (ev) => ev.stopPropagation());
+      overlay.addEventListener('click', fechar);
+      overlay.appendChild(painel);
+      document.body.appendChild(overlay);
+      this._wrZoom = overlay;
+
+      const w = painel.offsetWidth, h = painel.offsetHeight;
+      const s = Math.min((window.innerWidth * 0.9) / w, (window.innerHeight * 0.88) / h);
+      painel.style.transform = `scale(${s.toFixed(3)})`;
+    };
+    document.addEventListener('click', this._onWrZoomClick);
+    document.addEventListener('keydown', this._onWrZoomKey);
+  }
+
   componentWillUnmount(){
+    if(this._onWrZoomClick) document.removeEventListener('click', this._onWrZoomClick);
+    if(this._onWrZoomKey) document.removeEventListener('keydown', this._onWrZoomKey);
+    this._wrZoom?.remove();
     window.removeEventListener('resize', this._onResize);
     window.visualViewport?.removeEventListener('resize', this._onResize);
     if(this._raf) cancelAnimationFrame(this._raf);
