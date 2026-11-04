@@ -61,7 +61,7 @@
     from{opacity:0;transform:scale(0.96) translateY(8px);}
     to{opacity:1;transform:scale(1) translateY(0);}
   }
-  .wr-zoom-overlay{position:fixed;inset:0;background:rgba(14,26,58,0.55);display:flex;align-items:center;justify-content:center;z-index:80;animation:modalOverlayIn .18s ease;cursor:zoom-out;}
+  .wr-zoom-overlay{position:fixed;inset:0;background:rgba(14,26,58,0.55);display:flex;align-items:center;justify-content:center;z-index:80;animation:modalOverlayIn .18s ease;}
   .wr-zoom-painel{position:relative;background:#fff;border-radius:22px;padding:38px 22px 22px;box-shadow:0 24px 60px rgba(24,38,90,0.3);display:flex;flex-direction:column;gap:9px;transform-origin:center center;cursor:default;}
   .wr-zoom-fechar{position:absolute;top:8px;right:8px;border:none;background:#F1F5FF;border-radius:9px;width:26px;height:26px;font-size:15px;cursor:pointer;color:#5B6478;}
   .hover-scale{transition:transform .18s ease;}
@@ -196,7 +196,7 @@
           <div style="display:flex;flex-direction:column;gap:9px;">
 
             <!-- Grupo Valor -->
-            <div class="hover-scale wr-zoom" title="Clique para ampliar" style="cursor:zoom-in;display:flex;align-items:center;gap:18px;background:#EEF2FF;border:1px solid #D9E2F7;border-radius:18px;padding:16px 20px;">
+            <div class="hover-scale wr-zoom" style="cursor:pointer;display:flex;align-items:center;gap:18px;background:#EEF2FF;border:1px solid #D9E2F7;border-radius:18px;padding:16px 20px;">
               <div style="position:relative;width:108px;height:108px;flex:none;">
                 <div id="cr-cur-wr-val-ring" class="winring" data-pct="52.76" data-fill="#3D5FE0" data-track="#E2E7F4" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#3D5FE0 0%, #E2E7F4 0%);"></div>
                 <div style="position:absolute;inset:12px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;">
@@ -235,7 +235,7 @@
             </div>
 
             <!-- Grupo Quantidade -->
-            <div class="hover-scale wr-zoom" title="Clique para ampliar" style="cursor:zoom-in;display:flex;align-items:center;gap:18px;background:#EEF2FF;border:1px solid #D9E2F7;border-radius:18px;padding:16px 20px;margin-top:5px;">
+            <div class="hover-scale wr-zoom" style="cursor:pointer;display:flex;align-items:center;gap:18px;background:#EEF2FF;border:1px solid #D9E2F7;border-radius:18px;padding:16px 20px;margin-top:5px;">
               <div style="position:relative;width:108px;height:108px;flex:none;">
                 <div id="cr-cur-wr-qtd-ring" class="winring" data-pct="64.97" data-fill="#1E3FC4" data-track="#E2E7F4" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#1E3FC4 0%, #E2E7F4 0%);"></div>
                 <div style="position:absolute;inset:12px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;">
@@ -280,7 +280,7 @@
           <div style="display:flex;flex-direction:column;gap:9px;">
 
             <!-- Grupo Valor -->
-            <div class="hover-scale wr-zoom" title="Clique para ampliar" style="cursor:zoom-in;display:flex;align-items:center;gap:18px;background:#F2F5FC;border:1px solid #DCE6F5;border-radius:18px;padding:16px 20px;">
+            <div class="hover-scale wr-zoom" style="cursor:pointer;display:flex;align-items:center;gap:18px;background:#F2F5FC;border:1px solid #DCE6F5;border-radius:18px;padding:16px 20px;">
               <div style="position:relative;width:108px;height:108px;flex:none;">
                 <div id="cr-prev-wr-val-ring" class="winring" data-pct="63.27" data-fill="#8FA3C7" data-track="#DCE6F5" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#8FA3C7 0%, #DCE6F5 0%);"></div>
                 <div style="position:absolute;inset:12px;border-radius:50%;background:#F2F5FC;display:flex;align-items:center;justify-content:center;">
@@ -313,7 +313,7 @@
             </div>
 
             <!-- Grupo Quantidade -->
-            <div class="hover-scale wr-zoom" title="Clique para ampliar" style="cursor:zoom-in;display:flex;align-items:center;gap:18px;background:#F2F5FC;border:1px solid #DCE6F5;border-radius:18px;padding:16px 20px;margin-top:5px;">
+            <div class="hover-scale wr-zoom" style="cursor:pointer;display:flex;align-items:center;gap:18px;background:#F2F5FC;border:1px solid #DCE6F5;border-radius:18px;padding:16px 20px;margin-top:5px;">
               <div style="position:relative;width:108px;height:108px;flex:none;">
                 <div id="cr-prev-wr-qtd-ring" class="winring" data-pct="69.45" data-fill="#8FA3C7" data-track="#DCE6F5" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#8FA3C7 0%, #DCE6F5 0%);"></div>
                 <div style="position:absolute;inset:12px;border-radius:50%;background:#F2F5FC;display:flex;align-items:center;justify-content:center;">
