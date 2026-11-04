@@ -608,35 +608,35 @@
 <sc-if value="{{ modalHistoricoAberto }}" hint-placeholder-val="{{ false }}">
 <div onClick="{{ fecharModalHistorico }}" style="position:fixed;inset:0;background:rgba(14,26,58,0.45);display:flex;align-items:center;justify-content:center;z-index:65;animation:modalOverlayIn .18s ease;">
 <div style="transform:scale({{ scale }});transform-origin:center center;">
-<div onClick="{{ pararPropagacao }}" style="background:#fff;border-radius:20px;width:1280px;max-height:900px;padding:32px;box-shadow:0 24px 60px rgba(24,38,90,0.25);display:flex;flex-direction:column;gap:8px;animation:modalDialogIn .22s cubic-bezier(0.16,1,0.3,1);overflow-y:auto;">
+<div onClick="{{ pararPropagacao }}" style="background:#fff;border-radius:20px;width:1720px;max-height:1020px;padding:30px 32px;box-shadow:0 24px 60px rgba(24,38,90,0.25);display:flex;flex-direction:column;gap:8px;animation:modalDialogIn .22s cubic-bezier(0.16,1,0.3,1);overflow-y:auto;">
 <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
 <div style="display:flex;flex-direction:column;gap:3px;">
-<span style="font-size:20px;font-weight:700;color:#0E1A3A;">Histórico Mensal do Funil</span>
-<span id="modal-historico-periodo" style="font-size:13px;color:#7C88A6;">-</span>
+<span style="font-size:24px;font-weight:700;color:#0E1A3A;">Histórico Mensal do Funil</span>
+<span id="modal-historico-periodo" style="font-size:15px;color:#7C88A6;">-</span>
 </div>
 <button onClick="{{ fecharModalHistorico }}" style="border:none;background:#F1F5FF;border-radius:10px;width:32px;height:32px;font-size:16px;cursor:pointer;color:#5B6478;flex:none;" aria-label="Fechar">×</button>
 </div>
 <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
 <div style="display:flex;align-items:center;gap:16px;">
-<span style="display:inline-block;font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2B50F0;background:#F1F5FF;border-radius:8px;padding:6px 12px;">Funil em Volume de Orçamentos</span>
+<span style="display:inline-block;font-size:15px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2B50F0;background:#F1F5FF;border-radius:8px;padding:7px 14px;">Funil em Valor de Orçamentos</span>
 <span style="display:flex;align-items:center;gap:14px;margin-left:auto;">
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#B9CFFF;"></span>Enviados para Aprovação</span>
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#2B50F0;"></span>Faturados</span>
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#1E7F2C;"></span>Win Rate Volume</span>
-</span>
-</div>
-<div id="modal-historico-chart-volume"></div>
-</div>
-<div style="display:flex;flex-direction:column;gap:8px;margin-top:24px;">
-<div style="display:flex;align-items:center;gap:16px;">
-<span style="display:inline-block;font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2B50F0;background:#F1F5FF;border-radius:8px;padding:6px 12px;">Funil em Valor de Orçamentos</span>
-<span style="display:flex;align-items:center;gap:14px;margin-left:auto;">
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#B9CFFF;"></span>Enviados para Aprovação</span>
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#2B50F0;"></span>Faturados</span>
-<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5B6478;"><span style="width:10px;height:10px;border-radius:50%;background:#1E7F2C;"></span>Win Rate Valor</span>
+<span style="display:flex;align-items:center;gap:7px;font-size:15px;color:#5B6478;"><span style="width:12px;height:12px;border-radius:50%;background:#B9CFFF;"></span>Enviados para Aprovação</span>
+<span style="display:flex;align-items:center;gap:7px;font-size:15px;color:#5B6478;"><span style="width:12px;height:12px;border-radius:50%;background:#2B50F0;"></span>Faturados</span>
+<span style="display:flex;align-items:center;gap:7px;font-size:15px;color:#5B6478;"><span style="width:12px;height:12px;border-radius:50%;background:#1E7F2C;"></span>Win Rate Valor</span>
 </span>
 </div>
 <div id="modal-historico-chart-valor"></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:24px;">
+<div style="display:flex;align-items:center;gap:16px;">
+<span style="display:inline-block;font-size:15px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2B50F0;background:#F1F5FF;border-radius:8px;padding:7px 14px;">Funil em Volume de Orçamentos</span>
+<span style="display:flex;align-items:center;gap:14px;margin-left:auto;">
+<span style="display:flex;align-items:center;gap:7px;font-size:15px;color:#5B6478;"><span style="width:12px;height:12px;border-radius:50%;background:#B9CFFF;"></span>Enviados para Aprovação</span>
+<span style="display:flex;align-items:center;gap:7px;font-size:15px;color:#5B6478;"><span style="width:12px;height:12px;border-radius:50%;background:#2B50F0;"></span>Faturados</span>
+<span style="display:flex;align-items:center;gap:7px;font-size:15px;color:#5B6478;"><span style="width:12px;height:12px;border-radius:50%;background:#1E7F2C;"></span>Win Rate Volume</span>
+</span>
+</div>
+<div id="modal-historico-chart-volume"></div>
 </div>
 </div>
 </div>
@@ -1438,15 +1438,15 @@ class Component extends DCLogic {
   }
 
   montarGraficoHistorico(meses, enviados, enviadosFmt, faturados, faturadosFmt, winRatePct, corSerieClara, corSerieEscura){
-    const width = 1160, height = 300;
-    const padLeft = 46, padRight = 46, padTop = 40, padBottom = 30;
+    const width = 1650, height = 380;
+    const padLeft = 60, padRight = 60, padTop = 46, padBottom = 36;
     const chartW = width - padLeft - padRight;
     const n = meses.length;
 
     // Duas faixas verticais independentes: a linha de win rate vive só na
     // faixa de cima, a área de volume/valor só na faixa de baixo, com um
     // respiro entre elas - assim nunca se cruzam, por construção.
-    const faixaWinRateAltura = 62;
+    const faixaWinRateAltura = 78;
     const respiro = 16;
     const faixaAreaTopo = padTop + faixaWinRateAltura + respiro;
     const faixaAreaAltura = (height - padBottom) - faixaAreaTopo;
@@ -1479,23 +1479,23 @@ class Component extends DCLogic {
     const linhaWinRate = `<path d="${pathLine(winRatePct, yAtPct)}" fill="none" stroke="#1E7F2C" stroke-width="2.5"/>`;
 
     const rotulosEnviados = enviados.map((v, i) => {
-      const y = yAt(v) + 17;
-      return `<text x="${xAt(i).toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#0E1A3A">${this.escapeHtml(enviadosFmt[i])}</text>`;
+      const y = yAt(v) + 21;
+      return `<text x="${xAt(i).toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="16" font-weight="700" fill="#0E1A3A">${this.escapeHtml(enviadosFmt[i])}</text>`;
     }).join('');
     const rotulosFaturados = faturados.map((v, i) => {
-      const y = yAt(v) + 17;
-      return `<text x="${xAt(i).toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#0E1A3A">${this.escapeHtml(faturadosFmt[i])}</text>`;
+      const y = yAt(v) + 21;
+      return `<text x="${xAt(i).toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="16" font-weight="700" fill="#0E1A3A">${this.escapeHtml(faturadosFmt[i])}</text>`;
     }).join('');
 
     const pontosWinRate = winRatePct.map((p, i) => {
       const x = xAt(i), y = yAtPct(p);
-      const centerY = y - 16;
+      const centerY = y - 19;
       const label = p.toFixed(1).replace('.', ',') + '%';
-      const boxW = 16 + label.length * 6.6;
-      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="#1E7F2C"/><rect x="${(x - boxW / 2).toFixed(1)}" y="${(centerY - 10).toFixed(1)}" width="${boxW.toFixed(1)}" height="19" rx="9.5" fill="#E3F7E3"/><text x="${x.toFixed(1)}" y="${(centerY + 4).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#1E7F2C">${label}</text>`;
+      const boxW = 20 + label.length * 8.6;
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="#1E7F2C"/><rect x="${(x - boxW / 2).toFixed(1)}" y="${(centerY - 12).toFixed(1)}" width="${boxW.toFixed(1)}" height="24" rx="12" fill="#E3F7E3"/><text x="${x.toFixed(1)}" y="${(centerY + 5.5).toFixed(1)}" text-anchor="middle" font-size="15" font-weight="700" fill="#1E7F2C">${label}</text>`;
     }).join('');
 
-    const eixoX = meses.map((m, i) => `<text x="${xAt(i).toFixed(1)}" y="${(height - 6).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="600" fill="#9AA4BE">${this.escapeHtml(m)}</text>`).join('');
+    const eixoX = meses.map((m, i) => `<text x="${xAt(i).toFixed(1)}" y="${(height - 6).toFixed(1)}" text-anchor="middle" font-size="14" font-weight="600" fill="#9AA4BE">${this.escapeHtml(m)}</text>`).join('');
 
     return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;height:${height}px;display:block;">${gridLines}${areaEnviados}${areaFaturados}${linhaEnviados}${linhaFaturados}${rotulosEnviados}${rotulosFaturados}${linhaWinRate}${pontosWinRate}${eixoX}</svg>`;
   }
